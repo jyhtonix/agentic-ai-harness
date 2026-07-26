@@ -29,30 +29,15 @@ This project is currently in an early development stage and requires further enh
 
 ## Architecture
 
+The Agentic AI Security Harness follows a multi-agent architecture designed for SOC automation and cybersecurity analysis.
+
+High-level workflow:
 ```
 User Input → Orchestrator → Planner → Executor(s) → Reviewer → Response
 ```
 
-                User
-                  |
-                  v
-          Supervisor Agent
-                  |
-        +---------+---------+
-        |                   |
-   Planner Agent      Security Agents
-                         |
-       +-----------------+----------------+
-       |                 |                |
- Threat Hunter    Malware Analyst   Incident Response
-       |
-       v
- Security Tools Layer
-       |
- IOC Check | Log Parser | File Analysis
-       |
-       v
- Memory + Vector Store
+Detailed workflow:
+![Agentic AI Security Architecture](docs/agentic-ai-security-architecture.png)
 
 
 ### Layers
