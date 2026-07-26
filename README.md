@@ -37,6 +37,7 @@ User Input → Orchestrator → Planner → Executor(s) → Reviewer → Respons
 ```
 
 Detailed workflow:
+
 ![Agentic AI Security Architecture](docs/agentic-ai-security-architecture.png)
 
 
