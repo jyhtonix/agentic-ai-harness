@@ -56,3 +56,17 @@ cp .env.example .env
 pip install -r requirements.txt
 uvicorn api.main:app --reload
 ```
+
+## Agentic AI CTF Workflow
+
+Challenge File
+        ↓
+AI Agent Analysis
+        ↓
+Security Investigation
+        ↓
+Evidence Collection
+        ↓
+Solution Report
+        ↓
+Flag Submission
