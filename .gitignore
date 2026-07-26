@@ -49,3 +49,30 @@ docker-volumes/
 models/
 *.bin
 *.gguf
+
+# OpenCode / AI temporary files
+.opencode/
+.opencode-cache/
+.ai/
+
+# Reverse engineering outputs
+*.asm
+*.dis
+*.hex
+*.map
+*.dump
+*.strings
+
+# Reverse engineering tools
+*.gpr
+*.rep
+*.idb
+*.i64
+*.til
+ghidra_projects/
+ida_projects/
+binary_ninja_projects/
+
+# Temporary workspace
+tmp/
+scratch/

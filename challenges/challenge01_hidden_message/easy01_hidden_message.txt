@@ -1,0 +1,68 @@
+==================================================
+CTF Challenge: Hidden Message
+Category: Web Security / Information Disclosure
+Difficulty: Easy
+==================================================
+
+Challenge Description:
+
+A small company created a public website for their employees.
+
+The website homepage looks normal:
+
+------------------------------------------
+Welcome to ABC Technologies
+
+Our Services:
+- Cloud Solutions
+- Cyber Security Consulting
+- Software Development
+
+Contact:
+support@abctech.example
+------------------------------------------
+
+However, a security researcher noticed that some information
+might have been accidentally exposed.
+
+You are given the following clues:
+
+Clue 1:
+The website administrator mentioned:
+
+"I don't understand why people keep finding information
+that is not visible on the webpage."
+
+Clue 2:
+A developer left this comment inside the webpage source code:
+
+<!-- TODO: Remove temporary admin password before production -->
+
+Clue 3:
+The following text was found in the HTML source:
+
+<!--
+Temporary Admin Account:
+Username: admin_test
+Password: Welcome123!
+-->
+
+Question:
+
+1. What security vulnerability exists in this website?
+
+2. What information was accidentally exposed?
+
+3. What security recommendations should be provided to the company?
+
+Flag Format:
+
+FLAG{your_answer_here}
+
+Example:
+
+FLAG{information_disclosure}
+
+==================================================
+End of Challenge
+==================================================
