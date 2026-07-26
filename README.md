@@ -1,72 +1,305 @@
 # 🤖 Agentic AI Security Harness
 
-A Multi-Agent AI Framework for SOC Automation, Threat Analysis, and Cybersecurity Operations.
+A Multi-Agent AI Framework for Cybersecurity Learning, SOC Automation Research, and CTF Security Analysis.
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![Docker](https://img.shields.io/badge/Docker-Supported-blue)
 ![Cybersecurity](https://img.shields.io/badge/Focus-Cybersecurity-red)
 ![AI](https://img.shields.io/badge/AI-Agentic%20AI-purple)
 
-## Why This Project Exists
+---
 
-The Agentic AI Security Harness is developed as a learning and research project to explore how to design and build an Agentic AI system for cybersecurity applications, including potential use cases in Capture the Flag (CTF) competitions and security automation exercises.
+## Overview
 
-## Target Users
+The **Agentic AI Security Harness** is a learning and research project that explores how **Agentic AI systems** can be designed and applied to cybersecurity scenarios.
+
+The project focuses on building a multi-agent framework where AI agents can collaborate to perform cybersecurity-related tasks, including:
+
+* Security analysis
+* Threat investigation
+* SOC workflow automation
+* Evidence collection
+* CTF challenge analysis
+* Cybersecurity learning exercises
+
+The goal is to provide a practical environment for students, researchers, and cybersecurity enthusiasts to understand how AI agents can support security operations and problem-solving workflows.
+
+---
+
+# Why This Project Exists
+
+Traditional cybersecurity operations often require analysts to perform repetitive tasks such as:
+
+* Collecting information from multiple sources
+* Reviewing security evidence
+* Investigating suspicious activities
+* Documenting findings
+* Preparing incident reports
+
+This project explores how **Agentic AI workflows** can assist cybersecurity analysts by combining:
+
+* Planning agents
+* Execution agents
+* Analysis agents
+* Review agents
+
+to improve investigation efficiency and provide an educational platform for cybersecurity experimentation.
+
+---
+
+# Target Users
 
 This project is primarily designed for:
 
-- Cybersecurity students
-- Beginners interested in Artificial Intelligence (AI) and cybersecurity
-- Aspiring security analysts who want to understand how AI agents can support security operations
+* Cybersecurity students
+* Students learning Artificial Intelligence and cybersecurity
+* Beginner security analysts
+* Researchers exploring AI-assisted cybersecurity workflows
+* Participants preparing for Capture The Flag (CTF) competitions
 
-The project provides a practical learning platform for exploring multi-agent architecture, security workflows, and AI-assisted cybersecurity analysis.
+The project provides hands-on experience with:
 
-## Defensive Security Purpose
+* Multi-agent architecture
+* AI-assisted security investigation
+* Security automation concepts
+* CTF challenge solving workflows
 
-The Agentic AI Security Harness provides basic Tier-1 Security Operations Center (SOC) analysis capabilities to support initial security triage activities, including preliminary investigation, information gathering, and workflow automation.
+---
 
-This project is currently in an early development stage and requires further enhancement, testing, and validation before it can be considered suitable for real-world SOC operational environments.
+# Defensive Security Purpose
 
-## Architecture
+The Agentic AI Security Harness is designed for **cybersecurity education, research, and authorized security testing environments**.
 
-The Agentic AI Security Harness follows a multi-agent architecture designed for SOC automation and cybersecurity analysis.
+The framework explores how AI agents can assist with Tier-1 Security Operations Center (SOC) activities, including:
+
+* Initial security triage
+* Information gathering
+* Evidence analysis
+* Investigation assistance
+* Workflow automation
+* Report generation
+
+This project is currently in an early development stage and requires further enhancement, testing, and validation before being considered suitable for real-world SOC operational deployment.
+
+---
+
+# Architecture
+
+The Agentic AI Security Harness follows a multi-agent architecture designed for cybersecurity analysis and automation.
 
 High-level workflow:
+
 ```
-User Input → Orchestrator → Planner → Executor(s) → Reviewer → Response
+User Input
+    ↓
+Orchestrator
+    ↓
+Planner Agent
+    ↓
+Executor Agents
+    ↓
+Reviewer Agent
+    ↓
+Final Response
 ```
 
-Detailed workflow:
+The architecture follows a **planning-execution-review pattern**, where specialized AI agents collaborate to complete cybersecurity analysis tasks.
+
+## Security Architecture
 
 ![Agentic AI Security Architecture](docs/agentic-ai-security-architecture.png)
 
+---
 
-### Layers
-- **api/** — FastAPI HTTP entry point
-- **core/** — Orchestration engine & agent lifecycle
-- **agents/** — Specialized agent implementations
-- **tools/** — Capabilities (filesystem, web, code)
-- **models/** — LLM & embedding interfaces
-- **database/** — Persistence layer
-- **config/** — Environment & runtime configuration
+# System Components
 
-## Quick Start
-```bash
-cp .env.example .env
-pip install -r requirements.txt
-uvicorn api.main:app --reload
+The project is organized into several layers:
+
+```
+agent_harness/
+
+├── agents/          # Specialized AI agent implementations
+├── api/             # FastAPI HTTP interface
+├── challenges/      # CTF challenge scenarios and security exercises
+├── solutions/       # AI-generated investigation artifacts
+├── tools/           # Security analysis capabilities
+├── models/          # LLM and embedding interfaces
+├── database/        # Data persistence layer
+├── config/          # Environment and runtime configuration
+└── README.md
 ```
 
-## Agentic AI CTF Workflow
+## Component Description
 
-Challenge File
+| Folder        | Purpose                                                               |
+| ------------- | --------------------------------------------------------------------- |
+| `api/`        | Provides API entry points for interacting with the system             |
+| `core/`       | Contains orchestration engine and agent lifecycle management          |
+| `agents/`     | Contains specialized AI security agents                               |
+| `tools/`      | Provides supporting capabilities such as file analysis and automation |
+| `models/`     | Handles AI model and embedding interfaces                             |
+| `database/`   | Stores application data and persistence information                   |
+| `config/`     | Manages system configuration                                          |
+| `challenges/` | Contains CTF scenarios and security exercises                         |
+| `solutions/`  | Stores AI-generated analysis scripts and investigation outputs        |
+
+---
+
+# Agentic AI CTF Workflow
+
+The Agentic AI Security Harness can be used to explore AI-assisted Capture The Flag (CTF) security analysis.
+
+Workflow:
+
+```
+Challenge Input
         ↓
-AI Agent Analysis
+AI Agent Planning
         ↓
 Security Investigation
         ↓
 Evidence Collection
         ↓
-Solution Report
+Technical Analysis
+        ↓
+Solution Report Generation
         ↓
 Flag Submission
+```
+
+Example challenge categories:
+
+* Information disclosure
+* Log analysis
+* Network traffic analysis
+* Binary analysis
+* Malware investigation
+* Web security analysis
+
+---
+
+# CTF Challenge Structure
+
+Example:
+
+```
+challenges/
+
+├── challenge01_hidden_message/
+│   └── easy01_hidden_message.txt
+│
+├── challenge02_pcap_analysis/
+│   └── capture.pcapng
+│
+└── challenge03_binary_reverse/
+    ├── authorize
+    └── binary1
+```
+
+Challenge files represent the original materials provided to the AI agent or participants.
+
+---
+
+# AI Solution Artifacts
+
+During AI-assisted investigation, the system may generate:
+
+* Analysis scripts
+* Reverse engineering utilities
+* Investigation notes
+* Extracted evidence
+* Security reports
+
+Example:
+
+```
+solutions/
+
+└── challenge03_binary_reverse/
+
+    ├── analyze_binary1.py
+    ├── analyze_elf.py
+    ├── disasm.py
+    └── solve_binary1.py
+```
+
+These artifacts demonstrate the investigation process performed during CTF analysis.
+
+---
+
+# Quick Start
+
+## 1. Clone Repository
+
+```bash
+git clone <repository-url>
+
+cd agent_harness
+```
+
+## 2. Configure Environment
+
+```bash
+cp .env.example .env
+```
+
+Update required environment variables.
+
+## 3. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+## 4. Start Application
+
+```bash
+uvicorn api.main:app --reload
+```
+
+---
+
+# Development Status
+
+Current development focus:
+
+✅ Multi-agent cybersecurity workflow
+✅ AI-assisted CTF analysis
+✅ Security investigation automation
+✅ Challenge organization framework
+✅ Educational cybersecurity scenarios
+
+Future improvements:
+
+* Additional security agents
+* More CTF scenarios
+* Improved automation workflows
+* Enhanced reporting capability
+* Integration with cybersecurity tools
+
+---
+
+# Responsible Use
+
+This project is intended for:
+
+* Cybersecurity education
+* Research
+* CTF competitions
+* Authorized security testing environments
+
+Users should only analyze systems, files, and networks where they have appropriate authorization.
+
+This project should not be used for:
+
+* Unauthorized access
+* Malicious activities
+* Attacking systems without permission
+
+---
+
+# License
+
+This project is developed for educational and research purposes.
+
+Please use responsibly and follow applicable cybersecurity laws and regulations.
