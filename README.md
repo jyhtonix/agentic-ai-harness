@@ -1,12 +1,59 @@
-# AI Agent Harness
+# 🤖 Agentic AI Security Harness
 
-A production-ready multi-agent orchestration framework.
+A Multi-Agent AI Framework for SOC Automation, Threat Analysis, and Cybersecurity Operations.
+
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![Docker](https://img.shields.io/badge/Docker-Supported-blue)
+![Cybersecurity](https://img.shields.io/badge/Focus-Cybersecurity-red)
+![AI](https://img.shields.io/badge/AI-Agentic%20AI-purple)
+
+## Why This Project Exists
+
+The Agentic AI Security Harness is developed as a learning and research project to explore how to design and build an Agentic AI system for cybersecurity applications, including potential use cases in Capture the Flag (CTF) competitions and security automation exercises.
+
+## Target Users
+
+This project is primarily designed for:
+
+- Cybersecurity students
+- Beginners interested in Artificial Intelligence (AI) and cybersecurity
+- Aspiring security analysts who want to understand how AI agents can support security operations
+
+The project provides a practical learning platform for exploring multi-agent architecture, security workflows, and AI-assisted cybersecurity analysis.
+
+## Defensive Security Purpose
+
+The Agentic AI Security Harness provides basic Tier-1 Security Operations Center (SOC) analysis capabilities to support initial security triage activities, including preliminary investigation, information gathering, and workflow automation.
+
+This project is currently in an early development stage and requires further enhancement, testing, and validation before it can be considered suitable for real-world SOC operational environments.
 
 ## Architecture
 
 ```
 User Input → Orchestrator → Planner → Executor(s) → Reviewer → Response
 ```
+
+                User
+                  |
+                  v
+          Supervisor Agent
+                  |
+        +---------+---------+
+        |                   |
+   Planner Agent      Security Agents
+                         |
+       +-----------------+----------------+
+       |                 |                |
+ Threat Hunter    Malware Analyst   Incident Response
+       |
+       v
+ Security Tools Layer
+       |
+ IOC Check | Log Parser | File Analysis
+       |
+       v
+ Memory + Vector Store
+
 
 ### Layers
 - **api/** — FastAPI HTTP entry point
