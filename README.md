@@ -298,8 +298,21 @@ This project should not be used for:
 
 ---
 
-# License
+## License
 
-This project is developed for educational and research purposes.
+This project is released under the **Agentic AI Security Harness Attribution License**.
 
-Please use responsibly and follow applicable cybersecurity laws and regulations.
+You are welcome to use this project for:
+
+- cybersecurity education
+- research
+- learning activities
+- demonstrations
+
+Please provide attribution:
+
+> Jason Soo Weng Jyh (jyhtonix)  
+> Agentic AI Security Harness  
+> https://github.com/jyhtonix/agentic-ai-harness
+
+Commercial usage requires permission from the author.
