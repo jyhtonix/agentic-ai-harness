@@ -110,8 +110,8 @@ The architecture follows a **planning-execution-review pattern**, where speciali
 ![Agentic AI Security Architecture](docs/agentic-ai-security-architecture.png)
 
 Updated as of 2026-07-31:
-![Agentic AI Security Architecture](docs/Security_Architecture_as_of_2026-07-31.png)
 
+![Agentic AI Security Architecture](docs/Security_Architecture_as_of_2026-07-31.png)
 
 ---
 
