@@ -777,6 +777,7 @@ class TestArchitectureContracts:
             "request", "analysis", "plan", "agent_results",
             "verification", "learning_report", "final_response",
             "flag_verification", "challenge",
+            "team_coordination",
         }
         assert set(result.keys()) == expected_keys
 

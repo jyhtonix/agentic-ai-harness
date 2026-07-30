@@ -116,7 +116,8 @@ class SupervisorAgent:
                  execution_agent=None, verifier=None,
                  report_generator=None,
                  challenge_loader=None,
-                 flag_verifier=None):
+                 flag_verifier=None,
+                 coordinator=None):
         self.llm = llm
         self.registry = registry
         self.skill_selector = skill_selector
@@ -126,6 +127,7 @@ class SupervisorAgent:
         self.report_generator = report_generator
         self.challenge_loader = challenge_loader
         self.flag_verifier = flag_verifier
+        self.coordinator = coordinator
         self.conversation_history: list[AgentMessage] = []
 
     async def run(self, request: str, challenge_id: str = "") -> dict:
@@ -149,28 +151,54 @@ class SupervisorAgent:
         plan = await self._create_dispatch_plan(request)
         logger.info("Dispatch plan: %d steps", len(plan.get("steps", [])))
 
-        # Phase 2: Execute the plan
+        # Phase 2: Team coordination (if coordinator is available)
+        team_coordination = None
+        if self.coordinator:
+            logger.info("Using coordinator agent for team-based execution")
+            context = None
+            if challenge_def:
+                context = {"challenge_name": challenge_def.name, "category": challenge_def.category}
+            team_coordination = await self.coordinator.coordinate(request, context)
+            results = [{
+                "step": 0,
+                "agent": f["agent_name"],
+                "task": f["category"],
+                "status": "completed",
+                "response": "; ".join(f["findings"]) if f["findings"] else "",
+            } for f in team_coordination.get("findings", [])]
+            if not results:
+                results = [{
+                    "step": 0,
+                    "agent": "team_coordinator",
+                    "task": request,
+                    "status": "completed",
+                    "response": team_coordination.get("consolidated", {}).get("summary", ""),
+                }]
+            logger.info("Team coordination produced %d findings", len(results))
+
+        # Phase 2b: Execute the plan (skipped if coordinator was used)
         execution_result_ref = None
-        if self.execution_agent:
-            task_plan = self._dict_to_task_plan(plan)
-            execution_result_ref = await self.execution_agent.execute(task_plan, request=request)
-            results = execution_result_ref.to_legacy_dicts()
-            for r in execution_result_ref.step_results:
-                if r.response:
-                    self.conversation_history.append(
-                        AgentMessage(
-                            sender="supervisor", receiver=r.agent_name,
-                            task=r.task, conversation_id=request[:40],
+        if team_coordination is None:
+            if self.execution_agent:
+                task_plan = self._dict_to_task_plan(plan)
+                execution_result_ref = await self.execution_agent.execute(task_plan, request=request)
+                results = execution_result_ref.to_legacy_dicts()
+                for r in execution_result_ref.step_results:
+                    if r.response:
+                        self.conversation_history.append(
+                            AgentMessage(
+                                sender="supervisor", receiver=r.agent_name,
+                                task=r.task, conversation_id=request[:40],
+                            )
                         )
-                    )
-                    self.conversation_history.append(
-                        AgentMessage(
-                            sender=r.agent_name, receiver="supervisor",
-                            response=r.response, conversation_id=request[:40],
+                        self.conversation_history.append(
+                            AgentMessage(
+                                sender=r.agent_name, receiver="supervisor",
+                                response=r.response, conversation_id=request[:40],
+                            )
                         )
-                    )
-        else:
-            results = await self._execute_plan(request, plan)
+            else:
+                results = await self._execute_plan(request, plan)
 
         # Phase 3: Verify results
         verification = None
@@ -249,6 +277,7 @@ class SupervisorAgent:
                 "category": challenge_def.category,
                 "difficulty": challenge_def.difficulty,
             } if challenge_def else None,
+            "team_coordination": team_coordination,
             "final_response": final,
         }
 
