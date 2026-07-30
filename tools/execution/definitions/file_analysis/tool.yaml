@@ -1,0 +1,39 @@
+tools:
+  - name: file
+    description: Determine file type by examining magic bytes and headers
+    category: file_analysis
+    purpose: Identify unknown file formats during analysis
+    input_types:
+      - file_path
+    output_types:
+      - text
+    risk_level: low
+    execution_method: subprocess
+    command_template: file "{file_path}"
+    timeout_seconds: 10
+
+  - name: strings
+    description: Extract readable ASCII and Unicode strings from binary files
+    category: file_analysis
+    purpose: Discover embedded text, configuration data, and hidden messages in binaries
+    input_types:
+      - file_path
+    output_types:
+      - text
+    risk_level: low
+    execution_method: subprocess
+    command_template: strings "{file_path}"
+    timeout_seconds: 30
+
+  - name: exiftool
+    description: Read and write metadata from files (EXIF, IPTC, XMP)
+    category: file_analysis
+    purpose: Extract hidden metadata and examine file properties
+    input_types:
+      - file_path
+    output_types:
+      - text
+    risk_level: low
+    execution_method: subprocess
+    command_template: exiftool "{file_path}"
+    timeout_seconds: 15

@@ -159,13 +159,25 @@ agent_harness/
 │   ├── frameworks.py    MITRE ATT&CK (25 techniques), Cyber Kill Chain, NIST CSF, port mapping
 │   └── models.py        Dataclasses: Alert, IOC, LogEntry, Finding, Incident
 │
-├── tools/               Tool library
-│   ├── base.py          BaseTool ABC (name, description, parameters, execute)
-│   ├── registry.py      ToolRegistry
-│   ├── web_search.py    DuckDuckGo HTML search
-│   ├── code_runner.py   Sandboxed Python execution
-│   ├── ioc_check.py     IOC extraction via regex (IPs, hashes, domains, URLs, registry, mutexes)
-│   ├── log_parser.py    Multi-format log parser (syslog, Apache, JSON, key=value)
+    ├── tools/               Tool library
+    │   ├── base.py          BaseTool ABC (name, description, parameters, execute)
+    │   ├── registry.py      ToolRegistry (BaseTool instances)
+    │   ├── web_search.py    DuckDuckGo HTML search
+    │   ├── code_runner.py   Sandboxed Python execution
+    │   ├── ioc_check.py     IOC extraction via regex (IPs, hashes, domains, URLs, registry, mutexes)
+    │   ├── log_parser.py    Multi-format log parser (syslog, Apache, JSON, key=value)
+    │   └── execution/       CTF Tool Execution Framework (Phase 3.3)
+    │       ├── registry.py      ToolDefinitionRegistry (YAML-backed tool discovery)
+    │       ├── selector.py      ToolSelector (keyword + capability ranking)
+    │       ├── executor.py      ToolExecutor (sandboxed subprocess with timeout + audit)
+    │       ├── policy.py        ExecutionPolicy (allowlist + dangerous pattern blocking)
+    │       └── definitions/     Tool metadata YAML files
+    │           ├── registry.yaml
+    │           ├── file_analysis/tool.yaml   (file, strings, exiftool)
+    │           ├── malware/tool.yaml         (yara, capa)
+    │           ├── steganography/tool.yaml   (binwalk)
+    │           ├── web/tool.yaml             (curl)
+    │           └── general/tool.yaml         (python)
 │
 ├── learning/             Educational feedback layer
 │   └── report.py         LearningReportGenerator + LearningReport model
@@ -239,10 +251,13 @@ HTTP POST /api/v1/tasks
         │       For each step in dependency order:
         │         1. Look up agent in AgentRegistry
         │         2. Select & inject relevant skills (SkillSelector)
-        │         3. Dispatch via agent.receive(AgentMessage)
-        │         4. Agent processes task via process_task()
-        │         5. Collect results with retry on failure
-        │         6. Return structured ExecutionResult
+        │         3. Select & execute relevant tools (ToolSelector → ToolExecutor)
+        │            [optional — only when tool_selector + tool_executor are wired]
+        │         4. Append tool execution evidence to agent task
+        │         5. Dispatch via agent.receive(AgentMessage)
+        │         6. Agent processes task via process_task()
+        │         7. Collect results with retry on failure
+        │         8. Return structured ExecutionResult
         │     Supervisor converts to legacy dicts for synthesis
         │
         ├── Phase 3: Verify Results
@@ -409,3 +424,5 @@ Agents never import each other directly. The Supervisor discovers agents by name
     - **Difficulty estimation**: Based on step count (1-2 → beginner, 3-4 → intermediate, 5+ → advanced) and confidence score
     - **Learning objectives**: Category-based templates (e.g., "Understand and apply {skill} techniques for web-based challenges")
     - **Two report formats**: Student Report (learner-facing: skills practiced, objectives, suggestions) and Instructor Summary (educator-facing: performance indicators, skill gaps, training recommendations)
+
+12. **Controlled tool execution framework** — `ToolDefinitionRegistry` (`tools/execution/registry.py`) discovers tools from YAML metadata files, `ToolSelector` (`tools/execution/selector.py`) ranks them by keyword/capability/skill relevance, `ExecutionPolicy` (`tools/execution/policy.py`) enforces a tool allowlist and dangerous-command pattern blocking, and `ToolExecutor` (`tools/execution/executor.py`) runs approved tools via subprocess with configurable timeouts and full audit logging. Integration into `ExecutionAgent` is optional and backward-compatible — when `tool_selector` and `tool_executor` are wired, tool evidence is automatically appended to each agent task before dispatch. All execution results (SUCCESS / FAILED / TIMEOUT / BLOCKED / TOOL_NOT_FOUND) are recorded in an execution log with timestamps and duration.

@@ -1,0 +1,14 @@
+tools:
+  - name: python
+    description: Execute Python analysis scripts for custom CTF processing
+    category: general
+    purpose: Run Python one-liners or scripts for decoding, hashing, or data manipulation
+    input_types:
+      - script
+      - arguments (optional)
+    output_types:
+      - text
+    risk_level: medium
+    execution_method: subprocess
+    command_template: python -c "{script}"
+    timeout_seconds: 30

@@ -1,0 +1,13 @@
+tools:
+  - name: binwalk
+    description: Extract embedded files and detect signatures in firmware/binaries
+    category: steganography
+    purpose: Uncover hidden files appended to or embedded within carrier files
+    input_types:
+      - file_path
+    output_types:
+      - text
+    risk_level: low
+    execution_method: subprocess
+    command_template: binwalk "{file_path}"
+    timeout_seconds: 60

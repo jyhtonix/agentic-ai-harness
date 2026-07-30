@@ -1,0 +1,15 @@
+tools:
+  - name: curl
+    description: Transfer data to/from servers using HTTP/HTTPS/FTP
+    category: web
+    purpose: Send HTTP requests, inspect headers, download resources for web analysis
+    input_types:
+      - url
+      - headers (optional)
+      - method (optional)
+    output_types:
+      - text
+    risk_level: low
+    execution_method: subprocess
+    command_template: curl -s -L "{url}"
+    timeout_seconds: 30

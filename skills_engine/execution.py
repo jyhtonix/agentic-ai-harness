@@ -64,11 +64,15 @@ class ExecutionAgent:
         skill_selector=None,
         skill_injector=None,
         max_retries: int = 2,
+        tool_selector=None,
+        tool_executor=None,
     ):
         self.registry = registry
         self.skill_selector = skill_selector
         self.skill_injector = skill_injector
         self.max_retries = max_retries
+        self.tool_selector = tool_selector
+        self.tool_executor = tool_executor
 
     async def execute(
         self,
@@ -147,6 +151,47 @@ class ExecutionAgent:
             skills_used=unique_skills,
         )
 
+    async def _execute_tools_for_step(self, task: str, skills: list[dict]) -> str:
+        if not self.tool_selector or not self.tool_executor:
+            return ""
+        try:
+            recommendations = await self.tool_selector.select(
+                challenge_description=task,
+                selected_skills=skills,
+                limit=3,
+            )
+            if not recommendations:
+                return ""
+
+            evidence_parts = []
+            for rec in recommendations:
+                tool_name = rec.get("name", "")
+                result = await self.tool_executor.execute(
+                    tool_name=tool_name,
+                    params={"file_path": "/sample", "url": "http://localhost"},
+                )
+                status = result.get("status", "UNKNOWN")
+                output = result.get("output", "")
+                error = result.get("error", "")
+                duration = result.get("duration", 0.0)
+
+                if output:
+                    evidence_parts.append(
+                        f"[{tool_name}] (confidence: {rec.get('confidence', 0.0):.2f}, "
+                        f"status: {status}, duration: {duration}s)\n{output[:500]}"
+                    )
+                elif error:
+                    evidence_parts.append(
+                        f"[{tool_name}] (status: {status}) -> {error[:200]}"
+                    )
+
+            if evidence_parts:
+                return "\n\n".join(evidence_parts)
+            return ""
+        except Exception as e:
+            logger.warning("Tool execution for step failed: %s", e)
+            return ""
+
     async def _execute_step(
         self,
         index: int,
@@ -183,6 +228,14 @@ class ExecutionAgent:
                 )
                 step_skills = skills
 
+        tool_evidence = ""
+        if self.tool_selector and self.tool_executor:
+            tool_evidence = await self._execute_tools_for_step(step.task, step_skills)
+
+        effective_task = step.task
+        if tool_evidence:
+            effective_task = f"{step.task}\n\n[Tool Execution Evidence]\n{tool_evidence}"
+
         last_error: Optional[str] = None
         for attempt in range(1, self.max_retries + 1):
             try:
@@ -193,7 +246,7 @@ class ExecutionAgent:
                 message = AgentMessage(
                     sender="supervisor",
                     receiver=step.agent,
-                    task=step.task,
+                    task=effective_task,
                     conversation_id=request[:40],
                 )
                 reply = await agent.receive(message)

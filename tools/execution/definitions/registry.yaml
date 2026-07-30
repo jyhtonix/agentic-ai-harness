@@ -1,0 +1,7 @@
+version: "1.0"
+categories:
+  - file_analysis
+  - malware
+  - steganography
+  - web
+  - general
