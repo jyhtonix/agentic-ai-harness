@@ -1,0 +1,41 @@
+{
+  "successful": {
+    "crypto": [
+      {
+        "strategy": "crypto:python:crypto_agent",
+        "confidence": 0.9,
+        "recorded_at": "2026-07-30T15:14:28.275646+00:00"
+      },
+      {
+        "strategy": "Solved with: crypto_agent",
+        "confidence": 0.9,
+        "recorded_at": "2026-07-30T15:14:28.373446+00:00"
+      }
+    ],
+    "malware": [
+      {
+        "strategy": "Use PE analysis tools",
+        "confidence": 0.6,
+        "recorded_at": "2026-07-30T15:14:28.558925+00:00"
+      }
+    ]
+  },
+  "failed": {
+    "malware": [
+      {
+        "approach": "malware::",
+        "failure_reason": "missing PE analysis skill",
+        "recorded_at": "2026-07-30T15:14:28.437118+00:00",
+        "failure_count": 6
+      }
+    ],
+    "crypto": [
+      {
+        "approach": "crypto::",
+        "failure_reason": "insufficient reasoning",
+        "recorded_at": "2026-07-30T15:14:28.519621+00:00",
+        "failure_count": 12
+      }
+    ]
+  }
+}

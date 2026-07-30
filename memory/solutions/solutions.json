@@ -1,0 +1,80 @@
+[
+  {
+    "challenge_id": "c1",
+    "category": "crypto",
+    "difficulty": "m",
+    "approach": "solved_with_strategy_crypto_agent",
+    "tools_used": [
+      "python"
+    ],
+    "agents_used": [
+      "crypto_agent"
+    ],
+    "success": true,
+    "recorded_at": "2026-07-30T15:12:35.551085+00:00"
+  },
+  {
+    "challenge_id": "c1",
+    "category": "crypto",
+    "difficulty": "m",
+    "approach": "solved_with_strategy_crypto_agent",
+    "tools_used": [],
+    "agents_used": [
+      "crypto_agent"
+    ],
+    "success": true,
+    "recorded_at": "2026-07-30T15:12:35.623785+00:00"
+  },
+  {
+    "challenge_id": "c1",
+    "category": "crypto",
+    "difficulty": "m",
+    "approach": "solved_with_strategy_crypto_agent",
+    "tools_used": [
+      "python"
+    ],
+    "agents_used": [
+      "crypto_agent"
+    ],
+    "success": true,
+    "recorded_at": "2026-07-30T15:13:57.645728+00:00"
+  },
+  {
+    "challenge_id": "c1",
+    "category": "crypto",
+    "difficulty": "m",
+    "approach": "solved_with_strategy_crypto_agent",
+    "tools_used": [],
+    "agents_used": [
+      "crypto_agent"
+    ],
+    "success": true,
+    "recorded_at": "2026-07-30T15:13:57.712991+00:00"
+  },
+  {
+    "challenge_id": "c1",
+    "category": "crypto",
+    "difficulty": "m",
+    "approach": "solved_with_strategy_crypto_agent",
+    "tools_used": [
+      "python"
+    ],
+    "agents_used": [
+      "crypto_agent"
+    ],
+    "success": true,
+    "recorded_at": "2026-07-30T15:14:28.373446+00:00"
+  },
+  {
+    "challenge_id": "c1",
+    "category": "crypto",
+    "difficulty": "m",
+    "approach": "solved_with_strategy_crypto_agent",
+    "tools_used": [],
+    "agents_used": [
+      "crypto_agent"
+    ],
+    "success": true,
+    "recorded_at": "2026-07-30T15:14:28.436118+00:00"
+  }
+]

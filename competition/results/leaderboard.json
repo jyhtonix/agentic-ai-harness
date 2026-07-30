@@ -1,0 +1,33 @@
+[
+  {
+    "team_name": "TestTeam",
+    "total_score": 600,
+    "solved": 2,
+    "total_challenges": 2,
+    "total_time": 0.0,
+    "points_per_challenge": {
+      "c1": 300,
+      "c2": 300
+    }
+  },
+  {
+    "team_name": "FlakyTeam",
+    "total_score": 400,
+    "solved": 1,
+    "total_challenges": 1,
+    "total_time": 0.0,
+    "points_per_challenge": {
+      "c1": 400
+    }
+  },
+  {
+    "team_name": "ScoreTeam",
+    "total_score": 300,
+    "solved": 1,
+    "total_challenges": 1,
+    "total_time": 0.0,
+    "points_per_challenge": {
+      "c1": 300
+    }
+  }
+]
