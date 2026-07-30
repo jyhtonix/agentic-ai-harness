@@ -1,0 +1,20 @@
+tools:
+  - name: curl
+    description: Transfer data with HTTP/HTTPS for web testing
+    usage: curl [options] <url>
+    common_options:
+      - "-X POST: send POST request"
+      - "-d \"data\": send form data"
+      - "-b \"cookie\": send cookies"
+      - "-H \"header\": add custom header"
+      - "-L: follow redirects"
+      - "-v: verbose output for debugging"
+
+  - name: base64
+    description: Encode or decode base64 data
+    usage: base64 -d <encoded_string>
+    detection: Strings ending in = or == may be base64
+
+  - name: web_search
+    description: Search web for vulnerability documentation or payloads
+    usage: web_search <query>

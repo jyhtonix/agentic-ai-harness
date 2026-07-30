@@ -1,0 +1,31 @@
+name: web-security
+description: >-
+  Web application security analysis covering OWASP Top 10 vulnerabilities.
+  Includes SQL injection, XSS, CSRF, SSRF, authentication bypass, JWT
+  attacks, SSTI, LFI/RFI, and general HTTP request analysis.
+category: web
+difficulty: beginner
+supported_challenges:
+  - SQL injection (UNION, blind, time-based)
+  - Cross-site scripting (reflected, stored, DOM)
+  - Authentication bypass and session hijacking
+  - JWT token manipulation
+  - Server-side template injection
+  - Local/remote file inclusion
+required_tools:
+  - curl
+  - web_search
+  - base64
+  - jwt_tool
+verification_methods:
+  - Vulnerability type identified with evidence
+  - Payload constructed and tested
+  - Flag extracted and verified
+tags:
+  - web
+  - owasp
+  - sqli
+  - xss
+  - jwt
+  - ssti
+  - authentication

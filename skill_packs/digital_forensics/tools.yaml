@@ -1,0 +1,26 @@
+tools:
+  - name: strings
+    description: Extract printable strings from binary files
+    usage: strings [options] <file>
+    common_options:
+      - "-n <N>: minimum string length"
+      - "-e <enc>: encoding (l = UTF-16LE, b = UTF-16BE)"
+
+  - name: volatility
+    description: Advanced memory forensics framework
+    usage: volatility <plugin> -f <memory.dmp> [--profile=<profile>]
+    key_plugins:
+      - "imageinfo: determine OS profile"
+      - "pslist: list running processes"
+      - "netscan: list network connections (Win 7+)"
+      - "cmdscan: extract command history"
+      - "hivelist: list registry hives"
+
+  - name: sleuthkit
+    description: File system forensic analysis toolkit
+    usage: fls -r <image.dd> | mmls <image.dd> | icat <image.dd> <inode>
+    key_commands:
+      - "mmls: list partition table"
+      - "fls: list file names and metadata"
+      - "icat: extract file by inode number"
+      - "fsstat: display file system details"

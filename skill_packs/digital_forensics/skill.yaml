@@ -1,0 +1,32 @@
+name: digital-forensics
+description: >-
+  Digital forensics analysis covering file metadata extraction, timeline
+  reconstruction, evidence handling, artifact discovery from disk images,
+  memory captures, and log files. Defensive CTF focused.
+category: forensics
+difficulty: intermediate
+supported_challenges:
+  - File metadata and timestamp analysis
+  - Disk image analysis (dd, E01)
+  - Memory forensics (volatility)
+  - Log analysis and correlation
+  - Browser forensics (history, cookies)
+  - USB artifact analysis
+required_tools:
+  - strings
+  - file
+  - xxd
+  - volatility
+  - sleuthkit
+verification_methods:
+  - Evidence chain documented
+  - Artifacts identified with timestamps
+  - Findings correlated across sources
+tags:
+  - forensics
+  - disk
+  - memory
+  - timeline
+  - artifact
+  - evidence
+  - log-analysis

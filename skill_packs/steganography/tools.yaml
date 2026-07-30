@@ -1,0 +1,28 @@
+tools:
+  - name: zsteg
+    description: Detect and extract LSB steganography from PNG/BMP files
+    usage: zsteg [options] <image.png>
+    common_options:
+      - "-a: run all detection methods"
+      - "-l: list available channels"
+      - "-b <N>: specify bit number"
+
+  - name: steghide
+    description: Embed/extract hidden data in JPEG/BMP/WAV files
+    usage: steghide extract -sf <file> [-p <password>]
+    common_options:
+      - "extract -sf file.jpg: extract without password"
+      - "extract -sf file.jpg -p secret: extract with password"
+
+  - name: exiftool
+    description: Read and write metadata in media files
+    usage: exiftool [options] <file>
+    common_options:
+      - "<file>: show all metadata"
+
+  - name: binwalk
+    description: Scan files for embedded files and signatures
+    usage: binwalk [options] <file>
+    common_options:
+      - "-Me: recursive extraction of embedded files"
+      - "-e: extract detected file signatures"

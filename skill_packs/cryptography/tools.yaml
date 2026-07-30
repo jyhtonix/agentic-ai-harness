@@ -1,0 +1,16 @@
+tools:
+  - name: openssl
+    description: Cryptography toolkit for encryption, decryption, and key management
+    usage: openssl <command> [options]
+    common_commands:
+      - "enc -aes-256-cbc -d -in file.enc -out file.txt: decrypt AES"
+      - "rsautl -decrypt -inkey key.pem -in ciphertext.bin: RSA decrypt"
+      - "dgst -sha256 file.txt: compute SHA256 hash"
+
+  - name: python3
+    description: Python for custom cryptographic operations
+    common_libraries:
+      - "from Crypto.PublicKey import RSA: PyCryptodome RSA"
+      - "from Crypto.Cipher import AES: PyCryptodome AES"
+      - "import hashlib: built-in hashing"
+      - "import base64: built-in encoding"

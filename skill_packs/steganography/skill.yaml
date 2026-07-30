@@ -1,0 +1,32 @@
+name: steganography
+description: >-
+  Hidden data extraction from images, audio, and other media files.
+  Covers LSB steganography, metadata analysis, file carving, appended
+  data detection, EXIF analysis, and common embedding techniques.
+category: stego
+difficulty: beginner
+supported_challenges:
+  - LSB image steganography (BMP, PNG)
+  - EXIF metadata extraction
+  - Hidden file carving (binwalk, foremost)
+  - Appended data detection
+  - Audio steganography (spectrogram, phase encoding)
+  - QR code and barcode decoding
+required_tools:
+  - zsteg
+  - steghide
+  - binwalk
+  - strings
+  - exiftool
+verification_methods:
+  - Hidden message extracted and readable
+  - Embedding method identified
+  - Original vs modified file compared
+tags:
+  - stego
+  - image
+  - audio
+  - metadata
+  - lsb
+  - exif
+  - carving

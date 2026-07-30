@@ -1,0 +1,29 @@
+name: cryptography
+description: >-
+  Analysis of cryptographic challenges: encoding detection, classical
+  cipher breaking, RSA attacks, hash identification, weak PRNG patterns,
+  padding oracle attacks, and common cryptographic implementation flaws.
+category: crypto
+difficulty: intermediate
+supported_challenges:
+  - Encoding detection and decoding (base64, hex, rot, binary)
+  - Classical cipher breaking (Caesar, substitution, Vigenere, XOR)
+  - RSA attacks (small e, Wiener, common modulus, broadcast)
+  - Hash identification and length extension attacks
+  - Padding oracle and ECB byte-at-a-time attacks
+required_tools:
+  - python3
+  - openssl
+  - cyberchef (or equivalent)
+verification_methods:
+  - Plaintext recovered and verified
+  - Attack method documented with steps
+  - Key/cipher parameters extracted
+tags:
+  - crypto
+  - rsa
+  - aes
+  - hash
+  - encoding
+  - xor
+  - padding-oracle
