@@ -109,6 +109,214 @@ The architecture follows a **planning-execution-review pattern**, where speciali
 
 ![Agentic AI Security Architecture](docs/agentic-ai-security-architecture.png)
 
+Updated as of 2026-07-31:
+
+┌──────────────────────────────────────────────────────────────────────┐
+│                         USER / CTF PARTICIPANT                       │
+│                                                                      │
+│  Challenge Input                                                     │
+│  - Binary (.exe/.elf)                                                │
+│  - PCAP                                                              │
+│  - Source Code                                                       │
+│  - Web Application                                                   │
+│  - Crypto Data                                                       │
+└───────────────────────────────┬──────────────────────────────────────┘
+                                │
+                                ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│                     CHALLENGE MANAGEMENT LAYER                       │
+│                    challenges_engine/                                │
+│                                                                      │
+│  ChallengeLoader                                                     │
+│       │                                                              │
+│       ▼                                                              │
+│  ChallengeValidator                                                  │
+│       │                                                              │
+│       ▼                                                              │
+│  ChallengeRegistry                                                   │
+│                                                                      │
+│ Security Controls:                                                   │
+│ ✓ Validate challenge metadata                                        │
+│ ✓ Control allowed files                                             │
+│ ✓ Define allowed skills                                              │
+│ ✓ Define allowed tools                                               │
+│ ✓ Define verification method                                         │
+└───────────────────────────────┬──────────────────────────────────────┘
+                                │
+                                ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│                         SUPERVISOR AGENT                             │
+│                     Central Orchestrator                             │
+│                                                                      │
+│  SupervisorAgent                                                     │
+│                                                                      │
+│ Responsibilities:                                                    │
+│ ✓ Understand objective                                               │
+│ ✓ Manage workflow                                                    │
+│ ✓ Coordinate agents                                                  │
+│ ✓ Manage execution lifecycle                                         │
+│ ✓ Trigger learning loop                                              │
+└───────────────┬───────────────────────────────┬──────────────────────┘
+                │                               │
+                │                               │
+                ▼                               ▼
+┌─────────────────────────┐             ┌─────────────────────────────┐
+│   PLANNING LAYER        │             │   MEMORY / LEARNING LAYER   │
+│                         │             │                             │
+│ Planner                 │             │ memory/                     │
+│                         │             │                             │
+│ Creates:                │             │ StrategyMemory              │
+│ - Task plan             │             │ FailureMemory               │
+│ - Execution steps       │             │ SolutionMemory              │
+│ - Agent assignment      │             │ StrategyRanker              │
+│                         │             │                             │
+└────────────┬────────────┘             └─────────────┬───────────────┘
+             │                                        │
+             │                                        │
+             ▼                                        │
+┌──────────────────────────────────────────────────────────────────────┐
+│                     MULTI-AGENT TEAM LAYER                           │
+│                         agents/team/                                 │
+│                                                                      │
+│                    CoordinatorAgent                                  │
+│                           │                                          │
+│       ┌───────────────────┼───────────────────┐                      │
+│       │                   │                   │                      │
+│       ▼                   ▼                   ▼                      │
+│                                                                      │
+│ MalwareAgent        WebSecurityAgent        CryptoAgent              │
+│                                                                      │
+│       │                   │                   │                      │
+│       └───────────────────┼───────────────────┘                      │
+│                           │                                          │
+│                    ForensicsAgent                                    │
+│                                                                      │
+│ Additional Components:                                               │
+│                                                                      │
+│ AgentMessage                                                         │
+│ EvidencePool                                                         │
+│ AgentDebate                                                          │
+│                                                                      │
+└───────────────────────────────┬──────────────────────────────────────┘
+                                │
+                                ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│                         SKILL SYSTEM                                 │
+│                         skills_engine/                               │
+│                                                                      │
+│ SkillRegistry                                                        │
+│ SkillPackLoader                                                      │
+│ SkillSelector                                                        │
+│ SkillContextBuilder                                                  │
+│ SkillImprovementProposal                                             │
+│                                                                      │
+│ Examples:                                                            │
+│                                                                      │
+│ - Binary exploitation                                                │
+│ - Malware analysis                                                   │
+│ - RSA analysis                                                       │
+│ - PCAP analysis                                                      │
+│ - Web vulnerabilities                                                │
+└───────────────────────────────┬──────────────────────────────────────┘
+                                │
+                                ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│                          TOOL SECURITY LAYER                         │
+│                            tools/execution/                          │
+│                                                                      │
+│ ToolRegistry                                                         │
+│ ToolSelector                                                         │
+│ ToolExecutor                                                         │
+│ ExecutionPolicy                                                      │
+│                                                                      │
+│ Available Tools:                                                     │
+│                                                                      │
+│ file analysis                                                        │
+│ strings                                                              │
+│ yara                                                                 │
+│ tshark                                                               │
+│ debugger                                                             │
+│ web analysis                                                         │
+│                                                                      │
+│ Security Controls:                                                   │
+│ ✓ Tool allowlist                                                    │
+│ ✓ Dangerous command blocking                                        │
+│ ✓ Timeout control                                                   │
+│ ✓ Execution logging                                                 │
+└───────────────────────────────┬──────────────────────────────────────┘
+                                │
+                                ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│                       EXECUTION SANDBOX                              │
+│                                                                      │
+│  Analysis Environment                                                │
+│                                                                      │
+│  ┌────────────────────────────┐                                      │
+│  │ Binary Analysis Sandbox    │                                      │
+│  │                            │                                      │
+│  │ - ELF                      │                                      │
+│  │ - PE                       │                                      │
+│  │ - Malware Samples          │                                      │
+│  └────────────────────────────┘                                      │
+│                                                                      │
+│  ┌────────────────────────────┐                                      │
+│  │ Network Analysis Sandbox   │                                      │
+│  │                            │                                      │
+│  │ - PCAP                     │                                      │
+│  │ - Traffic Analysis         │                                      │
+│  └────────────────────────────┘                                      │
+│                                                                      │
+│ Security Controls:                                                   │
+│ ✓ Isolation                                                         │
+│ ✓ Resource limits                                                   │
+│ ✓ No uncontrolled execution                                         │
+│ ✓ Artifact tracking                                                 │
+└───────────────────────────────┬──────────────────────────────────────┘
+                                │
+                                ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│                     VERIFICATION LAYER                               │
+│                                                                      │
+│ VerificationAgent                                                    │
+│ FlagVerifier                                                         │
+│ LearningReportGenerator                                              │
+│                                                                      │
+│ Checks:                                                              │
+│ ✓ Evidence correctness                                              │
+│ ✓ Flag format                                                       │
+│ ✓ Unsupported claims                                                │
+│ ✓ Confidence score                                                  │
+└───────────────────────────────┬──────────────────────────────────────┘
+                                │
+                                ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│                   BENCHMARK & IMPROVEMENT ENGINE                     │
+│                                                                      │
+│ benchmark_engine/                                                    │
+│                                                                      │
+│ BenchmarkRunner                                                      │
+│ MetricsCollector                                                     │
+│ FailureAnalyzer                                                      │
+│ RetryController                                                      │
+│ StrategyEvolution                                                    │
+│ SkillGapDetector                                                     │
+│ OptimizationEngine                                                   │
+│                                                                      │
+│ Learning Loop:                                                       │
+│                                                                      │
+│ Failure                                                              │
+│   │                                                                  │
+│   ▼                                                                  │
+│ Analyze                                                              │
+│   │                                                                  │
+│   ▼                                                                  │
+│ Improve                                                              │
+│   │                                                                  │
+│   ▼                                                                  │
+│ Retry                                                                │
+│                                                                      │
+└──────────────────────────────────────────────────────────────────────┘
+
 ---
 
 # System Components
