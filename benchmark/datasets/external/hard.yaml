@@ -1,0 +1,248 @@
+dataset: external_hard
+description: "Hard difficulty CTF challenges for external validation benchmarking"
+version: "1.0"
+created: "2026-07-30"
+source: "educational_ctf"
+challenges:
+  # ── Crypto (5) ──
+  - id: ext_crypto_hard_001
+    name: Lattice-Based RSA Attack
+    category: crypto
+    difficulty: hard
+    description: >
+      An RSA public key with a 512-bit modulus has a small private
+      exponent d. Recover d using Wiener's continued fraction attack
+      or Boneh-Durfee lattice reduction.
+    required_skills: ["cryptography-advanced", "rsa-attacks", "lattice-reduction"]
+    allowed_tools: ["python"]
+    expected_flag: CTF{wiener_attack_recovery}
+
+  - id: ext_crypto_hard_002
+    name: Bleichenbacher PKCS1 Oracle
+    category: crypto
+    difficulty: hard
+    description: >
+      An RSA server acts as a PKCS1v1.5 padding oracle. Perform a
+      Bleichenbacher million-message attack to decrypt the ciphertext.
+    required_skills: ["cryptography-advanced", "rsa-oracle", "padding-oracle"]
+    allowed_tools: ["python"]
+    expected_flag: CTF{bleichenbacher_million}
+
+  - id: ext_crypto_hard_003
+    name: Elliptic Curve Discrete Log
+    category: crypto
+    difficulty: hard
+    description: >
+      An elliptic curve with a small subgroup and smooth order allows
+      Pohlig-Hellman attack. Compute the discrete log to recover
+      the private key.
+    required_skills: ["cryptography-advanced", "ecc", "pohlig-hellman"]
+    allowed_tools: ["python"]
+    expected_flag: CTF{pohlig_hellman_solved}
+
+  - id: ext_crypto_hard_004
+    name: RC4 Invariance Weakness
+    category: crypto
+    difficulty: hard
+    description: >
+      A custom protocol uses RC4 with related keys. Exploit the
+      Fluhrer-Mantin-Shamir attack to recover the key from
+      encrypted traffic.
+    required_skills: ["cryptography-advanced", "rc4-analysis", "fms-attack"]
+    allowed_tools: ["python"]
+    expected_flag: CTF{fms_rc4_recovered}
+
+  - id: ext_crypto_hard_005
+    name: Shamir Secret Sharing
+    category: crypto
+    difficulty: hard
+    description: >
+      A flag is split using Shamir's Secret Sharing with threshold k.
+      Given k-1 shares and a weakness in the polynomial generation,
+      recover the secret.
+    required_skills: ["cryptography-advanced", "secret-sharing", "lagrange-interpolation"]
+    allowed_tools: ["python"]
+    expected_flag: CTF{shamir_secret_recovered}
+
+  # ── Web (5) ──
+  - id: ext_web_hard_001
+    name: Prototype Pollution
+    category: web
+    difficulty: hard
+    description: >
+      A JavaScript application is vulnerable to prototype pollution
+      through a recursive merge function. Exploit it to achieve
+      server-side code execution.
+    required_skills: ["web-security-advanced", "prototype-pollution", "js-exploitation"]
+    allowed_tools: ["curl", "python"]
+    expected_flag: CTF{prototype_pollution_rce}
+
+  - id: ext_web_hard_002
+    name: WebSocket CSRF
+    category: web
+    difficulty: hard
+    description: >
+      A WebSocket endpoint lacks origin validation. Perform a
+      cross-site WebSocket hijacking attack to read sensitive data
+      from the server.
+    required_skills: ["web-security-advanced", "websocket-security", "csrf-websocket"]
+    allowed_tools: ["curl", "python"]
+    expected_flag: CTF{websocket_hijack}
+
+  - id: ext_web_hard_003
+    name: Desync Attack
+    category: web
+    difficulty: hard
+    description: >
+      An HTTP/1.1 reverse proxy and backend server disagree on
+      Content-Length vs Transfer-Encoding. Perform a request
+      smuggling attack to poison the cache.
+    required_skills: ["web-security-advanced", "request-smuggling", "http-desync"]
+    allowed_tools: ["curl", "python"]
+    expected_flag: CTF{http_desync_cache_poison}
+
+  - id: ext_web_hard_004
+    name: JWT Key Confusion
+    category: web
+    difficulty: hard
+    description: >
+      A JWT library uses the same variable for both verification and
+      signing keys. Exploit key confusion (RS256 → HS256) to forge
+      tokens using the public key.
+    required_skills: ["web-security-advanced", "jwt-key-confusion", "algorithm-confusion"]
+    allowed_tools: ["curl", "python"]
+    expected_flag: CTF{jwt_key_confusion}
+
+  - id: ext_web_hard_005
+    name: Race Condition in Payment
+    category: web
+    difficulty: hard
+    description: >
+      A payment endpoint has a TOCTOU race condition. Send concurrent
+      requests to exploit the race and apply a coupon multiple times.
+    required_skills: ["web-security-advanced", "race-condition", "concurrent-exploitation"]
+    allowed_tools: ["curl", "python"]
+    expected_flag: CTF{race_condition_exploited}
+
+  # ── Malware (5) ──
+  - id: ext_malware_hard_001
+    name: Obfuscated PowerShell
+    category: malware
+    difficulty: hard
+    description: >
+      A heavily obfuscated PowerShell script uses multiple layers of
+      encoding and compression. Deobfuscate it to reveal the C2
+      infrastructure and embedded flag.
+    required_skills: ["malware-analysis-advanced", "powershell-obfuscation", "script-analysis"]
+    allowed_tools: ["python", "strings"]
+    expected_flag: CTF{powershell_deobfuscated}
+
+  - id: ext_malware_hard_002
+    name: Kernel Callback Injection
+    category: malware
+    difficulty: hard
+    description: >
+      A kernel rootkit uses a callback mechanism to intercept system
+      calls. Analyse the driver to identify the callback and the
+      hidden payload.
+    required_skills: ["malware-analysis-advanced", "kernel-analysis", "driver-reversing"]
+    allowed_tools: ["python", "strings"]
+    expected_flag: CTF{kernel_callback_rootkit}
+
+  - id: ext_malware_hard_003
+    name: Process Doppelganging
+    category: malware
+    difficulty: hard
+    description: >
+      A malware sample uses Process Doppelganging to evade detection.
+      Analyse the NTFS transaction log to reconstruct the injected
+      process and extract the flag.
+    required_skills: ["malware-analysis-advanced", "process-doppelganging", "ntfs-transactions"]
+    allowed_tools: ["python", "strings"]
+    expected_flag: CTF{process_doppelganging}
+
+  - id: ext_malware_hard_004
+    name: ROP Chain Analysis
+    category: malware
+    difficulty: hard
+    description: >
+      A shellcode payload contains a ROP chain for DEP bypass.
+      Analyse the gadgets and reconstruct the chain to understand
+      what code was executed.
+    required_skills: ["malware-analysis-advanced", "rop-analysis", "exploitation-techniques"]
+    allowed_tools: ["python"]
+    expected_flag: CTF{rop_chain_analysed}
+
+  - id: ext_malware_hard_005
+    name: Firmware Backdoor
+    category: malware
+    difficulty: hard
+    description: >
+      A router firmware image contains a hidden backdoor in the
+      web interface. Extract the firmware, find the backdoor code,
+      and recover the hardcoded credentials.
+    required_skills: ["malware-analysis-advanced", "firmware-analysis", "embedded-security"]
+    allowed_tools: ["file", "binwalk", "python", "strings"]
+    expected_flag: CTF{firmware_backdoor_found}
+
+  # ── Forensics (5) ──
+  - id: ext_forensics_hard_001
+    name: BitLocker Recovery
+    category: forensics
+    difficulty: hard
+    description: >
+      A BitLocker-encrypted drive image is provided along with a
+      memory dump containing the encryption key. Extract the key
+      from the memory dump and decrypt the volume.
+    required_skills: ["forensics-advanced", "bitlocker-forensics", "memory-analysis"]
+    allowed_tools: ["python", "strings"]
+    expected_flag: CTF{bitlocker_decrypted}
+
+  - id: ext_forensics_hard_002
+    name: Timeline Reconstruction
+    category: forensics
+    difficulty: hard
+    description: >
+      Multiple forensic artifacts (USN journal, $MFT, event logs,
+      prefetch) are provided. Correlate them to reconstruct the
+      timeline of a ransomware attack and identify the initial
+      compromise vector.
+    required_skills: ["forensics-advanced", "timeline-analysis", "artifact-correlation"]
+    allowed_tools: ["python"]
+    expected_flag: CTF{timeline_reconstructed}
+
+  - id: ext_forensics_hard_003
+    name: Network Protocol Reversing
+    category: forensics
+    difficulty: hard
+    description: >
+      A PCAP file contains traffic from a custom C2 protocol.
+      Reverse-engineer the protocol structure, extract the
+      command and control messages, and decode the exfiltrated data.
+    required_skills: ["forensics-advanced", "protocol-analysis", "c2-reversing"]
+    allowed_tools: ["python", "strings"]
+    expected_flag: CTF{c2_protocol_decoded}
+
+  - id: ext_forensics_hard_004
+    name: SSD Wear-Leveling Recovery
+    category: forensics
+    difficulty: hard
+    description: >
+      An SSD image has deleted files that cannot be recovered via
+      normal carving due to wear-leveling and TRIM. Reconstruct
+      the deleted data from the raw NAND blocks.
+    required_skills: ["forensics-advanced", "ssd-forensics", "nand-recovery"]
+    allowed_tools: ["python"]
+    expected_flag: CTF{ssd_nand_recovery}
+
+  - id: ext_forensics_hard_005
+    name: Cloud Forensics
+    category: forensics
+    difficulty: hard
+    description: >
+      A compromised AWS environment has CloudTrail logs, S3 access
+      logs, and EC2 instance metadata. Analyse the cloud artifacts
+      to trace the attacker's path and find the exfiltrated flag.
+    required_skills: ["forensics-advanced", "cloud-forensics", "aws-investigation"]
+    allowed_tools: ["python"]
+    expected_flag: CTF{cloud_forensics_complete}

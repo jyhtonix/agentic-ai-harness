@@ -1,0 +1,44 @@
+"""External CTF source definitions."""
+
+sources:
+  educational_ctf:
+    name: Educational CTF Collection
+    type: educational
+    license: educational
+    url: ""
+    description: "Curated educational CTF challenges for benchmarking"
+
+  picoctf:
+    name: picoCTF
+    type: competition
+    license: educational
+    url: "https://picoctf.org"
+    description: "Carnegie Mellon's CTF competition challenges"
+
+  cryptohack:
+    name: CryptoHack
+    type: educational
+    license: educational
+    url: "https://cryptohack.org"
+    description: "Cryptography-focused CTF challenges"
+
+  hackthebox:
+    name: Hack The Box
+    type: platform
+    license: commercial
+    url: "https://hackthebox.com"
+    description: "HTB CTF challenges and machines"
+
+  tryhackme:
+    name: TryHackMe
+    type: educational
+    license: commercial
+    url: "https://tryhackme.com"
+    description: "THM guided CTF learning paths"
+
+  rootme:
+    name: Root-Me
+    type: platform
+    license: educational
+    url: "https://root-me.org"
+    description: "French CTF platform with diverse challenges"
