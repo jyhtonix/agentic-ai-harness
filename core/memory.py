@@ -416,6 +416,59 @@ class MemoryManager:
         self.vector = vector
 
     # ------------------------------------------------------------------
+    # Skill memory
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _skill_text_for_embedding(skill: dict) -> str:
+        fm = skill.get("frontmatter", {})
+        parts = [
+            fm.get("name", ""),
+            fm.get("description", ""),
+            fm.get("subdomain", ""),
+            " ".join(fm.get("tags", [])),
+        ]
+        return " | ".join(p for p in parts if p)
+
+    async def store_skill_embedding(self, skill: dict) -> Optional[str]:
+        if not self.vector:
+            return None
+        text = self._skill_text_for_embedding(skill)
+        fm = skill.get("frontmatter", {})
+        meta = {
+            "type": "skill",
+            "name": fm.get("name", ""),
+            "subdomain": fm.get("subdomain", ""),
+            "tags": fm.get("tags", []),
+            "path": skill.get("metadata", {}).get("path", ""),
+        }
+        return await self.vector.store(content=text, metadata=meta)
+
+    async def store_all_skill_embeddings(self, skills: list[dict]) -> int:
+        count = 0
+        for skill in skills:
+            eid = await self.store_skill_embedding(skill)
+            if eid:
+                count += 1
+        return count
+
+    async def search_skills(self, query: str, limit: int = 5) -> list[dict]:
+        if not self.vector:
+            return []
+        results = await self.vector.search(query, limit=limit * 3)
+        skill_results = [r for r in results if r.metadata.get("type") == "skill"]
+        return [
+            {
+                "name": r.metadata.get("name", ""),
+                "subdomain": r.metadata.get("subdomain", ""),
+                "tags": r.metadata.get("tags", []),
+                "path": r.metadata.get("path", ""),
+                "score": round(r.score, 4),
+            }
+            for r in skill_results[:limit]
+        ]
+
+    # ------------------------------------------------------------------
     # Core workflow
     # ------------------------------------------------------------------
 

@@ -35,7 +35,11 @@ flowchart TB
     end
 
     subgraph CORE["Core Engine"]
-        SUP["SupervisorAgent<br/>(analyse → plan → dispatch → synthesise)"]
+        SUP["SupervisorAgent<br/>(analyse → synthesise)"]
+        PLAN["SkillPlanner<br/>(LLM-based dispatch plan)"]
+        EXEC["ExecutionAgent<br/>(step dispatch & orchestration)"]
+        VER["VerificationAgent<br/>(evidence & hallucination check)"]
+        REP["LearningReportGenerator<br/>(educational feedback)"]
         REG["AgentRegistry<br/>(name → agent lookup)"]
         RUNTIME["Agent Runtime<br/>(7-phase lifecycle:<br/>init → understand → plan<br/>→ execute → evaluate<br/>→ reflect → respond)"]
         MEM["MemoryManager<br/>(WorkingMemory + LongTermMemory + VectorMemory)"]
@@ -76,8 +80,14 @@ flowchart TB
     LOG --> TASKS
     TASKS -->|"supervisor.run()"| SUP
 
-    SUP -->|"get_agent()"| REG
-    SUP -->|"agent.receive(msg)"| AGENTS
+    SUP -->|"planner.create_plan()"| PLAN
+    PLAN -->|"llm.chat()"| LLM
+    SUP -->|"execution_agent.execute()"| EXEC
+    EXEC -->|"get_agent()"| REG
+    EXEC -->|"agent.receive(msg)"| AGENTS
+    EXEC -->|"StepResult[]"| VER
+    VER -->|"VerificationResult"| REP
+    REP -->|"LearningReport"| SUP
     SUP -->|"llm.chat()"| LLM
 
     RES --> WEB
@@ -116,7 +126,8 @@ agent_harness/
 │   ├── alert_analyst.py SIEM alert triage (SOC)
 │   ├── threat_hunter.py Proactive threat hunting (SOC)
 │   ├── malware_analyst.py  Malware static/dynamic analysis (SOC)
-│   └── incident_responder.py  Incident response & containment (SOC)
+│   ├── incident_responder.py  Incident response & containment (SOC)
+│   └── verifier.py       VerificationAgent (evidence, flag format, hallucination checks)
 │
 ├── api/                 FastAPI HTTP entry point
 │   └── main.py          Routes, middleware wiring, auth, health, metrics
@@ -155,15 +166,40 @@ agent_harness/
 │   ├── code_runner.py   Sandboxed Python execution
 │   ├── ioc_check.py     IOC extraction via regex (IPs, hashes, domains, URLs, registry, mutexes)
 │   ├── log_parser.py    Multi-format log parser (syslog, Apache, JSON, key=value)
+│
+├── learning/             Educational feedback layer
+│   └── report.py         LearningReportGenerator + LearningReport model
 │   ├── file_tool.py     File read/write tool
 │   ├── filesystem.py    Directory listing tool
 │   └── database_tool.py SQL query tool
+│
+├── skills_engine/       CTF skill system (Phase 1-2)
+│   ├── schema.py        SkillFrontmatter, TokenBudget, FrameworkMapping, SkillMetadata
+│   ├── loader.py        SkillLoader (discover, load, build_index, write_index)
+│   ├── registry.py      SkillRegistry (register, search, filter)
+│   ├── selector.py      SkillSelector (keyword + vector skill matching)
+│   ├── injector.py      SkillInjector (prompt enrichment with token budget)
+│   ├── planner.py       SkillPlanner + TaskPlan/PlanStep Pydantic models
+│   ├── execution.py     ExecutionAgent + ExecutionResult/StepResult/ExecutionStatus
+│   └── validator.py     SkillValidator (frontmatter, cross-ref, tool whitelist)
+│
+├── skills/              Skill content files (SKILL.md + YAML frontmatter)
+│   ├── categories.yaml  Single source of truth for category taxonomy
+│   ├── index.json       Auto-generated registry (fast scan entry point)
+│   ├── solve-challenge/ Master orchestrator skill (user-invocable)
+│   ├── ctf-web/         Web exploitation techniques
+│   ├── ctf-forensics/   Digital forensics techniques (PCAP, stego, metadata)
+│   └── ctf-reverse/     Reverse engineering techniques (ELF, Java, strings)
+│
+├── scripts/             Build and validation tooling
+│   ├── build_index.py   CLI: scan skills/ → validate → generate index.json
+│   └── validate_all_skills.py  CLI: bulk validation with optional security audit
 │
 ├── workflows/           Predefined multi-agent workflows
 │   ├── soc_incident_response.py  End-to-end SOC workflow
 │   └── security_audit.py         Security audit workflow
 │
-├── tests/               13 test files, 147 tests
+├── tests/               16 test files, 324 tests
 │   ├── test_agent_runtime.py     Agent lifecycle, auto tool selection
 │   ├── test_memory.py           Working/Vector/MemoryManager, LongTermMemory ORM
 │   ├── test_soc_agents.py       SOC frameworks, models, tools, agents, workflow
@@ -195,20 +231,52 @@ HTTP POST /api/v1/tasks
   └── supervisor.run(request)
         │
         ├── Phase 1: Analyse & Plan
-        │     LLM receives available agents → returns JSON dispatch plan
-        │     with steps: {agent, task, depends_on[]}
+        │     SkillPlanner.create_plan() — LLM generates TaskPlan
+        │     with typed PlanStep[]: {agent, task, depends_on[]}
         │
         ├── Phase 2: Execute Plan
-        │     For each step in dependency order:
-        │       1. Look up agent in AgentRegistry
-        │       2. Create AgentMessage(sender="supervisor", receiver=agent_name)
-        │       3. Call agent.receive(message)
-        │       4. Agent processes task via process_task() → LLM + Tools
-        │       5. Agent returns reply AgentMessage with response
-        │       6. Record in conversation_history
+        │     Supervisor delegates to ExecutionAgent.execute(plan)
+        │       For each step in dependency order:
+        │         1. Look up agent in AgentRegistry
+        │         2. Select & inject relevant skills (SkillSelector)
+        │         3. Dispatch via agent.receive(AgentMessage)
+        │         4. Agent processes task via process_task()
+        │         5. Collect results with retry on failure
+        │         6. Return structured ExecutionResult
+        │     Supervisor converts to legacy dicts for synthesis
         │
-        └── Phase 3: Synthesise
-              LLM receives all agent results → produces final response
+        ├── Phase 3: Verify Results
+        │     VerificationAgent reviews each step result:
+        │       • Flag format detection (flag{...}, FLAG{...}, CTF{...})
+        │       • Empty/minimal response check (< 20 chars → warning)
+        │       • Evidence/reasoning marker presence
+        │       • Unsupported/uncertain language detection
+        │       • Failed execution identification
+        │     Produces VerificationResult with:
+        │       • Overall status (passed / failed / needs_review)
+        │       • Confidence score (0.0–1.0)
+        │       • Structured findings with severity
+        │       • Recommendations
+        │
+        ├── Phase 4: Generate Learning Report
+        │     LearningReportGenerator analyses:
+        │       • Skills selected by SkillSelector during execution
+        │       • VerificationResult (confidence, findings)
+        │       • Agent result quality (failed/successful steps)
+        │     Produces LearningReport with:
+        │       • Challenge ID (deterministic hash of request)
+        │       • Skills mastered vs. needing improvement
+        │       • Learning objectives per skill category
+        │       • Difficulty estimate (beginner/intermediate/advanced)
+        │       • Student Report (formatted: what was learned, skills practiced, suggestions)
+        │       • Instructor Summary (formatted: performance indicators, skill gaps, training)
+        │     Fully deterministic (no LLM calls)
+        │
+        └── Phase 5: Synthesise
+              Supervisor._synthesize() — LLM receives verification results
+              and learning report alongside agent outputs → produces final
+              response with awareness of confidence, flagged issues, and
+              educational context
 ```
 
 ### Agent Internal Lifecycle
@@ -273,7 +341,10 @@ Synthesis — combined report
 
 | Agent | Type | Purpose | Tools | Communicates With |
 |-------|------|---------|-------|-------------------|
-| **SupervisorAgent** | Coordinator | Analyse requests, dispatch to specialists, synthesise results | LLM only | All 8 agents |
+| **SupervisorAgent** | Coordinator | Analyse requests, delegate execution, synthesise results | LLM only | ExecutionAgent, LLM |
+| **ExecutionAgent** | Coordinator | Execute plan steps, select skills, dispatch to specialists, retry on failure | SkillSelector, AgentRegistry | All 8 agents, SkillSelector |
+| **VerificationAgent** | Framework | Review agent outputs for evidence quality, flag format, hallucination, completeness | None (stateless rules) | Supervisor (receives results) |
+| **LearningReportGenerator** | Framework | Generate educational feedback reports from execution and verification results | None (deterministic) | Supervisor (receives results) |
 | **ResearchAgent** | Specialist | Web research & structured reporting | `web_search` | Supervisor |
 | **CodingAgent** | Specialist | Code generation, review, debugging, block execution | `code_runner` | Supervisor |
 | **SecurityAgent** | Specialist | Vulnerability analysis, OWASP/CWE, remediation | None (LLM) | Supervisor |
@@ -317,3 +388,24 @@ Agents never import each other directly. The Supervisor discovers agents by name
 5. **LLM response cache** — Deterministic responses (temperature=0) are cached by (model, messages, temperature) hash with configurable TTL, reducing cost and latency.
 
 6. **Production middleware stack** — Auth → Rate Limit → Tracing → Logging are layered as FastAPI middleware, keeping route handlers clean and consistent.
+
+7. **SkillPlanner + ExecutionAgent decomposition** — The original monolithic SupervisorAgent was decomposed into three responsibilities: (a) **SkillPlanner** generates typed `TaskPlan`/`PlanStep` models via LLM, (b) **ExecutionAgent** executes those steps with dependency ordering, skill injection, and retry logic, (c) **SupervisorAgent** remains as the top-level coordinator that wires the two and synthesises the final response. This follows the Single Responsibility Principle and makes each component independently testable.
+
+8. **Structured execution results** — `ExecutionResult`/`StepResult`/`ExecutionStatus` models replace raw dicts from the execution loop. `StepResult` tracks attempts, error messages, and agent responses. `ExecutionResult.to_legacy_dicts()` provides backward compatibility for the synthesis phase.
+
+9. **Verification as a stateless gate** — `VerificationAgent` (`agents/verifier.py`) is a purely stateless rule engine that reviews agent outputs without an LLM or external services. It performs:
+   - **Flag format detection** via regex for `flag{...}`, `FLAG{...}`, `CTF{...}` patterns
+   - **Evidence quality** by scanning for reasoning marker phrases ("because", "evidence shows", "based on")
+   - **Completeness** by detecting empty or minimal responses (< 20 characters)
+   - **Hallucination risk** by flagging uncertain language ("I think", "probably", "might be")
+   - **Execution failure** tracking from step status
+   
+   Confidence scoring starts at 1.0 and deducts for each issue (empty: -0.3, failure: -0.25, minimal: -0.15, missing evidence: -0.1, unsupported claims: -0.1). Flag presence adds up to +0.15. The score determines the final status (PASSED ≥ 0.8, NEEDS_REVIEW ≥ 0.6, FAILED below).
+
+10. **Four-phase supervisor pipeline** — The original monolithic Supervisor has been decomposed into Plan (SkillPlanner) → Execute (ExecutionAgent) → Verify (VerificationAgent) → Learn (LearningReportGenerator) → Synthesise (Supervisor). Each phase produces typed models consumed by the next, making the pipeline independently testable and auditable.
+
+11. **Deterministic learning reports** — `LearningReportGenerator` (`learning/report.py`) uses zero LLM calls. It analyses execution skills, verification findings, and step status through rule-based classification:
+    - **Skill classification**: With flag present and confidence >= 0.7 → mastered; with errors or confidence < 0.5 → needing improvement
+    - **Difficulty estimation**: Based on step count (1-2 → beginner, 3-4 → intermediate, 5+ → advanced) and confidence score
+    - **Learning objectives**: Category-based templates (e.g., "Understand and apply {skill} techniques for web-based challenges")
+    - **Two report formats**: Student Report (learner-facing: skills practiced, objectives, suggestions) and Instructor Summary (educator-facing: performance indicators, skill gaps, training recommendations)

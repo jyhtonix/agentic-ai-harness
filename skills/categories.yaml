@@ -1,0 +1,73 @@
+# CTF Skills Category Taxonomy
+# Single source of truth for skill categorization.
+
+categories:
+  - id: web
+    name: Web Exploitation
+    description: >-
+      SQL injection, XSS, SSRF, path traversal, authentication bypass,
+      JWT attacks, CSRF, CORS misconfiguration, SSTI, LFI/RFI,
+      and other web application vulnerabilities.
+    order: 1
+
+  - id: forensics
+    name: Digital Forensics
+    description: >-
+      PCAP analysis, file carving, memory analysis, steganography,
+      metadata forensics, log analysis, and data recovery.
+    order: 2
+
+  - id: reverse
+    name: Reverse Engineering
+    description: >-
+      Binary analysis, disassembly, decompilation, packer detection,
+      Java reverse engineering, and firmware analysis.
+    order: 3
+
+  - id: crypto
+    name: Cryptography
+    description: >-
+      Symmetric and asymmetric cipher attacks, hash length extension,
+      padding oracle, RSA attacks, ECB byte-at-a-time, PRNG tampering.
+    order: 4
+
+  - id: pwn
+    name: Binary Exploitation
+    description: >-
+      Buffer overflow, ROP, format string, shellcode, ret2libc,
+      ASLR/DEP bypass, heap exploitation.
+    order: 5
+
+  - id: osint
+    name: OSINT
+    description: >-
+      Domain recon, social media investigation, image metadata,
+      certificate transparency, Shodan/Censys, geolocation.
+    order: 6
+
+  - id: malware
+    name: Malware Analysis
+    description: >-
+      Static and dynamic analysis, sandboxing, IOC extraction,
+      behavioral analysis, and reverse engineering of malicious software.
+    order: 7
+
+  - id: misc
+    name: Miscellaneous
+    description: >-
+      Encoding, compression, QR codes, audio analysis, protocol
+      reversing, game hacking, and general problem-solving.
+    order: 8
+
+tier_overrides:
+  master:
+    - solve-challenge
+  category:
+    - ctf-web
+    - ctf-forensics
+    - ctf-reverse
+    - ctf-crypto
+    - ctf-pwn
+    - ctf-osint
+    - ctf-malware
+    - ctf-misc

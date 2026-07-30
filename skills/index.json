@@ -1,0 +1,99 @@
+{
+  "version": "1.0",
+  "total_skills": 4,
+  "skills": [
+    {
+      "name": "ctf-forensics",
+      "description": "Digital forensics techniques for CTF challenges. Covers PCAP analysis, steganography, file carving, metadata extraction, log analysis, and hidden data discovery in files.",
+      "domain": "ctf",
+      "subdomain": "forensics",
+      "category": "forensics",
+      "tags": [
+        "forensics",
+        "pcap",
+        "stego",
+        "metadata",
+        "carving",
+        "analysis"
+      ],
+      "version": "1.0",
+      "user_invocable": false,
+      "path": "skills\\ctf-forensics",
+      "file_count": 2,
+      "total_lines": 117,
+      "content_hash": "11d325ccc2fadc93",
+      "requires": []
+    },
+    {
+      "name": "ctf-reverse",
+      "description": "Reverse engineering techniques for CTF challenges. Covers ELF binary analysis, string extraction, disassembly, Java reverse engineering, and deobfuscation of compiled code.",
+      "domain": "ctf",
+      "subdomain": "reverse",
+      "category": "reverse",
+      "tags": [
+        "reverse",
+        "binary",
+        "elf",
+        "disassembly",
+        "java",
+        "strings",
+        "ghidra"
+      ],
+      "version": "1.0",
+      "user_invocable": false,
+      "path": "skills\\ctf-reverse",
+      "file_count": 1,
+      "total_lines": 72,
+      "content_hash": "193461ff831142ea",
+      "requires": []
+    },
+    {
+      "name": "ctf-web",
+      "description": "Web exploitation techniques for CTF challenges. Covers SQL injection, XSS, SSRF, path traversal, JWT attacks, authentication bypass, and common web vulnerability patterns seen in CTF competitions.",
+      "domain": "ctf",
+      "subdomain": "web",
+      "category": "web",
+      "tags": [
+        "web",
+        "exploitation",
+        "http",
+        "sqli",
+        "xss",
+        "jwt",
+        "ssti",
+        "lfi"
+      ],
+      "version": "1.0",
+      "user_invocable": false,
+      "path": "skills\\ctf-web",
+      "file_count": 1,
+      "total_lines": 63,
+      "content_hash": "72ec6270f16227e0",
+      "requires": []
+    },
+    {
+      "name": "solve-challenge",
+      "description": "Master orchestrator for solving CTF challenges. Analyses challenge files, determines the category, routes to the appropriate category skill, and guides the agent through discovery, exploitation, and flag capture.",
+      "domain": "ctf",
+      "subdomain": "general",
+      "category": "master",
+      "tags": [
+        "ctf",
+        "orchestrator",
+        "solve",
+        "triage"
+      ],
+      "version": "1.0",
+      "user_invocable": true,
+      "path": "skills\\solve-challenge",
+      "file_count": 1,
+      "total_lines": 89,
+      "content_hash": "dadb12cd6d8f7a53",
+      "requires": [
+        "ctf-web",
+        "ctf-forensics",
+        "ctf-reverse"
+      ]
+    }
+  ]
+}

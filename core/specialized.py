@@ -25,11 +25,19 @@ class SpecializedAgent(BaseAgent):
     """
     Base class for all specialized agents with messaging support.
     Subclasses override `process_task()` to implement their logic.
+
+    Skill integration: When a skill_selector and skill_injector are provided,
+    relevant CTF skill content is automatically injected into the system
+    prompt before task processing. This is transparent to subclasses.
     """
 
-    def __init__(self, name: str, llm: LLM, system_prompt: str):
+    def __init__(self, name: str, llm: LLM, system_prompt: str,
+                 skill_selector=None, skill_injector=None):
         super().__init__(name, llm, system_prompt)
         self.conversation_history: list[AgentMessage] = []
+        self.skill_selector = skill_selector
+        self.skill_injector = skill_injector
+        self._selected_skills: list[dict] = []
 
     # ------------------------------------------------------------------
     # Public API: receive a message, return a reply
@@ -77,6 +85,9 @@ class SpecializedAgent(BaseAgent):
         except Exception as e:
             return AgentResult(agent_name=self.name, success=False, output="", error=str(e))
 
+    def set_skills(self, skills: list[dict]) -> None:
+        self._selected_skills = skills
+
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
@@ -87,8 +98,11 @@ class SpecializedAgent(BaseAgent):
         return response.content
 
     def _build_messages(self, user_content: str) -> list[dict]:
-        """Build a standard system+user message list."""
-        return [
+        """Build a standard system+user message list, with skill injection."""
+        base = [
             {"role": "system", "content": self.system_prompt},
             {"role": "user", "content": user_content},
         ]
+        if self.skill_injector and self._selected_skills:
+            return self.skill_injector.inject_into_messages(base, self._selected_skills)
+        return base

@@ -51,6 +51,13 @@ class Settings(BaseSettings):
     llm_cache_size: int = 500
     llm_cache_ttl: int = 3600
 
+    # Skills System
+    skills_dir: str = "skills"
+    skill_cache_ttl: int = 3600
+    skill_auto_load: bool = True
+    skill_index_auto_build: bool = True
+    skill_injection_budget: int = 2048
+
     model_config = {"env_file": ".env", "extra": "ignore"}
 
 
