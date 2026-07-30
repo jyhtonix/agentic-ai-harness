@@ -1,0 +1,17 @@
+name: Vulnerable HTTP Analysis
+category: web_security
+difficulty: beginner
+description: >
+  An HTTP request log has been captured showing a potential SQL injection
+  attempt. Analyse the request to understand the vulnerability and find the
+  flag that was exposed in the server response.
+required_skills:
+  - web-security-basics
+  - sql-injection-awareness
+allowed_tools:
+  - curl
+  - python
+verification:
+  type: exact_flag
+flag_format: CTF{.*}
+expected_flag: CTF{sqli_detected}

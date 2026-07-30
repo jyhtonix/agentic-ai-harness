@@ -185,6 +185,23 @@ agent_harness/
 │   ├── filesystem.py    Directory listing tool
 │   └── database_tool.py SQL query tool
 │
+├── challenges_engine/   Challenge Orchestration & Evaluation (Phase 3.4)
+│   ├── models.py        ChallengeDefinition pydantic model
+│   ├── loader.py        ChallengeLoader (YAML discover, load, validate)
+│   ├── registry.py      ChallengeRegistry (register, search, filter by category/difficulty/skill)
+│   ├── validator.py     ChallengeValidator (metadata, skills, tools, files)
+│   └── verifier.py      FlagVerifier (exact, regex, evidence matching)
+│
+├── challenges/           CTF challenge packages with structured metadata
+│   ├── stego_basic_001/      challenge.yaml + files + hints
+│   ├── malware_basic_001/    Malware analysis challenge
+│   ├── crypto_basic_001/     Cryptography challenge
+│   ├── web_basic_001/        Web security challenge
+│   ├── forensics_basic_001/  Digital forensics challenge
+│   ├── challenge01_hidden_message/  (legacy)
+│   ├── challenge02_pcap_analysis/   (legacy)
+│   └── ... (3 more legacy challenges)
+│
 ├── skills_engine/       CTF skill system (Phase 1-2)
 │   ├── schema.py        SkillFrontmatter, TokenBudget, FrameworkMapping, SkillMetadata
 │   ├── loader.py        SkillLoader (discover, load, build_index, write_index)
@@ -211,7 +228,7 @@ agent_harness/
 │   ├── soc_incident_response.py  End-to-end SOC workflow
 │   └── security_audit.py         Security audit workflow
 │
-├── tests/               16 test files, 324 tests
+├── tests/               19 test files, 471 tests
 │   ├── test_agent_runtime.py     Agent lifecycle, auto tool selection
 │   ├── test_memory.py           Working/Vector/MemoryManager, LongTermMemory ORM
 │   ├── test_soc_agents.py       SOC frameworks, models, tools, agents, workflow
@@ -287,11 +304,20 @@ HTTP POST /api/v1/tasks
         │       • Instructor Summary (formatted: performance indicators, skill gaps, training)
         │     Fully deterministic (no LLM calls)
         │
+        ├── Phase 4.5: Flag Verification (optional)
+        │     When challenge_loader + flag_verifier are wired and a
+        │     challenge_id is provided, run FlagVerifier.verify() against
+        │     agent responses and tool outputs:
+        │       • exact_flag — exact string comparison
+        │       • regex — flag_format pattern + expected match
+        │       • evidence — scan tool output + agent response
+        │     Produces {status, method, detail, student_flag} in result
+        │
         └── Phase 5: Synthesise
-              Supervisor._synthesize() — LLM receives verification results
-              and learning report alongside agent outputs → produces final
-              response with awareness of confidence, flagged issues, and
-              educational context
+              Supervisor._synthesize() — LLM receives verification results,
+              flag verification result, challenge info, and learning report
+              alongside agent outputs → produces final response with
+              awareness of confidence, flagged issues, and educational context
 ```
 
 ### Agent Internal Lifecycle

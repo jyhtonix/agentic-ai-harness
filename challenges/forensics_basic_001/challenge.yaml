@@ -1,0 +1,19 @@
+name: Digital Artifact Recovery
+category: forensics
+difficulty: beginner
+description: >
+  A disk image contains a deleted file with important evidence. Use file
+  analysis tools to identify and recover artifacts from the provided file.
+  The flag is hidden in the recovered artifact metadata.
+required_skills:
+  - forensics-basics
+  - file-analysis
+allowed_tools:
+  - strings
+  - file
+  - exiftool
+  - binwalk
+verification:
+  type: exact_flag
+flag_format: CTF{.*}
+expected_flag: CTF{artifact_recovered}

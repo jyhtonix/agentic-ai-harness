@@ -1,0 +1,1 @@
+Look at the URL parameters — one of them contains a SQL injection pattern.

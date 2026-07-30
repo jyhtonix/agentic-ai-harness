@@ -104,12 +104,19 @@ class SupervisorAgent:
     Learning report: When a report_generator (LearningReportGenerator)
     is provided, an educational feedback report is generated after
     verification and included in the synthesis context.
+
+    Challenge orchestration: When a challenge_loader and flag_verifier are
+    provided, the supervisor can pre-load a challenge by ID, validate it,
+    inject challenge context into the pipeline, and run flag verification
+    on results.
     """
 
     def __init__(self, llm: LLM, registry: AgentRegistry,
                  skill_selector=None, planner=None,
                  execution_agent=None, verifier=None,
-                 report_generator=None):
+                 report_generator=None,
+                 challenge_loader=None,
+                 flag_verifier=None):
         self.llm = llm
         self.registry = registry
         self.skill_selector = skill_selector
@@ -117,15 +124,26 @@ class SupervisorAgent:
         self.execution_agent = execution_agent
         self.verifier = verifier
         self.report_generator = report_generator
+        self.challenge_loader = challenge_loader
+        self.flag_verifier = flag_verifier
         self.conversation_history: list[AgentMessage] = []
 
-    async def run(self, request: str) -> dict:
+    async def run(self, request: str, challenge_id: str = "") -> dict:
         """
         Execute the full supervisor workflow for a user request.
         Returns a dict with the dispatch plan, individual agent results,
         and the final synthesised response.
         """
         logger.info("Supervisor processing request: %.60s", request)
+
+        # Phase 0: Load challenge if challenge_loader is wired
+        challenge_def = None
+        flag_result = None
+        if self.challenge_loader and challenge_id:
+            challenge_def = self.challenge_loader.load(challenge_id)
+            if challenge_def:
+                logger.info("Loaded challenge: %s (%s)", challenge_def.name, challenge_def.category)
+                request = f"[Challenge: {challenge_def.name}]\n{challenge_def.description}\n\n{request}"
 
         # Phase 1: Analyse and plan
         plan = await self._create_dispatch_plan(request)
@@ -174,11 +192,23 @@ class SupervisorAgent:
         learning_report = None
         if self.report_generator:
             skills_used = getattr(execution_result_ref, "skills_used", []) if execution_result_ref else []
+            tools_used = _extract_tools_from_results(results)
             learning_report = self.report_generator.generate(
                 request=request,
                 skills_used=skills_used,
                 verification_result=verification,
                 agent_results=results,
+                challenge_info={
+                    "name": challenge_def.name,
+                    "category": challenge_def.category,
+                    "difficulty": challenge_def.difficulty,
+                } if challenge_def else None,
+                flag_result={
+                    "status": flag_result.status,
+                    "method": flag_result.method,
+                    "detail": flag_result.detail,
+                } if flag_result else None,
+                tools_used=tools_used,
             )
             logger.info(
                 "Learning report: challenge=%s difficulty=%s objectives=%d",
@@ -186,6 +216,17 @@ class SupervisorAgent:
                 learning_report.difficulty_estimate,
                 len(learning_report.learning_objectives),
             )
+
+        # Phase 4.5: Flag verification (if challenge is loaded)
+        flag_result = None
+        if self.flag_verifier and challenge_def:
+            tool_outputs = _collect_tool_outputs(results)
+            flag_result = self.flag_verifier.verify(
+                challenge=challenge_def,
+                agent_response="\n".join(r.get("response", "") for r in results),
+                tool_outputs=tool_outputs,
+            )
+            logger.info("Flag verification: %s (method=%s)", flag_result.status, flag_result.method)
 
         # Phase 5: Synthesize final response
         final = await self._synthesize(request, results, verification, learning_report)
@@ -197,6 +238,17 @@ class SupervisorAgent:
             "agent_results": results,
             "verification": verification.model_dump() if verification else None,
             "learning_report": learning_report.model_dump() if learning_report else None,
+            "flag_verification": {
+                "status": flag_result.status,
+                "method": flag_result.method,
+                "detail": flag_result.detail,
+                "student_flag": flag_result.student_flag,
+            } if flag_result else None,
+            "challenge": {
+                "name": challenge_def.name,
+                "category": challenge_def.category,
+                "difficulty": challenge_def.difficulty,
+            } if challenge_def else None,
             "final_response": final,
         }
 
@@ -375,3 +427,24 @@ class SupervisorAgent:
             analysis=plan.get("analysis", ""),
             steps=steps,
         )
+
+
+def _collect_tool_outputs(results: list[dict]) -> list[dict]:
+    """Extract tool execution outputs from agent results for flag verification."""
+    tool_outputs = []
+    for r in results:
+        response = r.get("response", "")
+        if "[Tool Execution Evidence]" in response:
+            tool_outputs.append({"tool": "agent", "output": response})
+    return tool_outputs
+
+
+def _extract_tools_from_results(results: list[dict]) -> list[str]:
+    """Extract tool names referenced in agent responses."""
+    tools = set()
+    for r in results:
+        response = r.get("response", "")
+        for tool_name in ["strings", "file", "exiftool", "yara", "capa", "binwalk", "curl", "python"]:
+            if tool_name in response.lower():
+                tools.add(tool_name)
+    return sorted(tools)

@@ -1,0 +1,16 @@
+name: Weak RSA Analysis
+category: cryptography
+difficulty: beginner
+description: >
+  A capture contains an RSA-encrypted message with a small modulus that is
+  vulnerable to basic cryptanalysis. Analyse the provided key material and
+  ciphertext to recover the plaintext flag.
+required_skills:
+  - cryptography-basics
+  - rsa-fundamentals
+allowed_tools:
+  - python
+verification:
+  type: exact_flag
+flag_format: CTF{.*}
+expected_flag: CTF{weak_rsa_broken}

@@ -1,0 +1,17 @@
+name: Hidden Message in Image
+category: steganography
+difficulty: beginner
+description: >
+  A PNG image file has been provided that appears to be a simple screenshot.
+  However, there is a hidden message embedded in the image using steganography.
+  Use appropriate tools to extract the hidden flag from the image.
+required_skills:
+  - steganography-basics
+allowed_tools:
+  - strings
+  - exiftool
+  - binwalk
+verification:
+  type: exact_flag
+flag_format: CTF{.*}
+expected_flag: CTF{hidden_in_plain_sight}

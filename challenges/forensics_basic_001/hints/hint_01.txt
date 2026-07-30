@@ -1,0 +1,1 @@
+Run 'file' to identify the artifact type, then check metadata with 'exiftool'.

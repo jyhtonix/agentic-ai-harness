@@ -105,9 +105,14 @@ class LearningReportGenerator:
         skills_used: Optional[list[dict]] = None,
         verification_result: "Optional[VerificationResult]" = None,
         agent_results: Optional[list[dict]] = None,
+        challenge_info: Optional[dict] = None,
+        flag_result: Optional[dict] = None,
+        tools_used: Optional[list[str]] = None,
     ) -> LearningReport:
         skills = skills_used or []
         results = agent_results or []
+        challenge = challenge_info or {}
+        tools = tools_used or []
 
         challenge_id = self._make_challenge_id(request)
         challenge_summary = self._summarise_challenge(request)
@@ -117,6 +122,8 @@ class LearningReportGenerator:
         learning_objectives = self._generate_objectives(skills)
         difficulty = self._estimate_difficulty(skills, results, verification_result)
         recommendations = self._make_recommendations(skills_needing, verification_result)
+        recommendations += self._make_challenge_recommendations(challenge, flag_result)
+        recommendations += self._make_tool_recommendations(tools, flag_result)
 
         vr_dict = verification_result.model_dump() if verification_result else None
 
@@ -131,8 +138,8 @@ class LearningReportGenerator:
             recommendations=recommendations,
             difficulty_estimate=difficulty,
         )
-        report.student_report = self._format_student_report(report)
-        report.instructor_summary = self._format_instructor_summary(report)
+        report.student_report = self._format_student_report(report, challenge, flag_result, tools)
+        report.instructor_summary = self._format_instructor_summary(report, challenge, flag_result, tools)
         return report
 
     # ------------------------------------------------------------------
@@ -249,12 +256,44 @@ class LearningReportGenerator:
 
         return recs
 
+    def _make_challenge_recommendations(
+        self,
+        challenge_info: dict,
+        flag_result: Optional[dict],
+    ) -> list[str]:
+        recs = []
+        if not flag_result:
+            return recs
+        status = flag_result.get("status", "")
+        if status == "PASS":
+            recs.append(f"Challenge '{challenge_info.get('name', '')}' flag correctly identified")
+        elif status == "FAIL":
+            recs.append(f"Flag verification failed for challenge '{challenge_info.get('name', '')}' — review the expected output")
+        return recs
+
+    @staticmethod
+    def _make_tool_recommendations(
+        tools_used: list[str],
+        flag_result: Optional[dict],
+    ) -> list[str]:
+        recs = []
+        if not tools_used:
+            recs.append("Consider using more analysis tools to gather evidence")
+            return recs
+        recs.append(f"Tools utilized: {', '.join(tools_used)}")
+        return recs
+
     # ------------------------------------------------------------------
     # Report format helpers
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _format_student_report(report: LearningReport) -> str:
+    def _format_student_report(
+        report: LearningReport,
+        challenge_info: Optional[dict] = None,
+        flag_result: Optional[dict] = None,
+        tools_used: Optional[list[str]] = None,
+    ) -> str:
         skills_practiced = "\n".join(
             f"  - {s.get('name', s.get('description', 'unknown'))}"
             for s in report.skills_used
@@ -278,6 +317,18 @@ class LearningReportGenerator:
             f"  - {r}" for r in report.recommendations
         ) if report.recommendations else "  (none)"
 
+        if challenge_info:
+            challenge_header = f"Challenge: {challenge_info.get('name', '')} ({challenge_info.get('category', '')})"
+            suggestions = f"{challenge_header}\n{suggestions}"
+
+        if flag_result:
+            flag_line = f"Flag Status: {flag_result.get('status', 'UNKNOWN')} (method: {flag_result.get('method', 'none')})"
+            suggestions = f"{flag_line}\n{suggestions}"
+
+        if tools_used:
+            tools_line = f"Tools Used: {', '.join(tools_used)}"
+            suggestions = f"{tools_line}\n{suggestions}"
+
         return STUDENT_REPORT_TEMPLATE.format(
             challenge_summary=report.challenge_summary,
             difficulty_estimate=report.difficulty_estimate,
@@ -289,7 +340,12 @@ class LearningReportGenerator:
         )
 
     @staticmethod
-    def _format_instructor_summary(report: LearningReport) -> str:
+    def _format_instructor_summary(
+        report: LearningReport,
+        challenge_info: Optional[dict] = None,
+        flag_result: Optional[dict] = None,
+        tools_used: Optional[list[str]] = None,
+    ) -> str:
         v = report.verification_result or {}
         confidence = v.get("confidence_score", 0.0) if isinstance(v, dict) else 0.0
         v_status = v.get("status", "unknown") if isinstance(v, dict) else "unknown"
@@ -317,6 +373,16 @@ class LearningReportGenerator:
         training = "\n".join(
             f"  - {r}" for r in report.recommendations
         ) if report.recommendations else "  (none)"
+
+        if challenge_info:
+            training += f"\n  Challenge Category: {challenge_info.get('category', 'unknown')}"
+            training += f"\n  Challenge Difficulty: {challenge_info.get('difficulty', 'unknown')}"
+
+        if flag_result:
+            training += f"\n  Flag Verification: {flag_result.get('status', 'UNKNOWN')}"
+
+        if tools_used:
+            training += f"\n  Tools Selected: {', '.join(tools_used)}"
 
         return INSTRUCTOR_SUMMARY_TEMPLATE.format(
             challenge_id=report.challenge_id,
