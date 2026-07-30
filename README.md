@@ -298,21 +298,32 @@ This project should not be used for:
 
 ---
 
+# Agentic AI-Driven CTF Harness
+
+An autonomous AI-powered cybersecurity CTF solving framework.
+
 ## License
 
-This project is released under the **Agentic AI Security Harness Attribution License**.
+MIT License
 
-You are welcome to use this project for:
+Copyright (c) 2026 Soo Weng Jyh
 
-- cybersecurity education
-- research
-- learning activities
-- demonstrations
 
-Please provide attribution:
+## Citation
 
-> Jason Soo Weng Jyh (jyhtonix)  
-> Agentic AI Security Harness  
-> https://github.com/jyhtonix/agentic-ai-harness
+If you use this project for research, education, academic work, or publications,
+please cite this project:
 
-Commercial usage requires permission from the author.
+Soo Weng Jyh (2026).
+"Agentic AI-Driven CTF Harness: An Autonomous Multi-Agent Cybersecurity CTF Framework."
+GitHub repository:
+https://github.com/jyhtonix/agent_harness
+
+
+## Acknowledgement
+
+If this project contributes to your research, education activities,
+or cybersecurity competitions, acknowledgement of this project and
+its creator is appreciated.
+
+

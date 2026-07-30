@@ -1,56 +1,21 @@
-Agentic AI Security Harness - Attribution License
+MIT License
 
-Copyright (c) 2026 Jason Soo Weng Jyh (jyhtonix)
+Copyright (c) 2026 Soo Weng Jyh
 
-Permission is hereby granted to use, copy, modify, and distribute this software
-and its documentation for educational, research, and non-commercial purposes,
-subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-1. Attribution Requirement
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-Any use, reproduction, modification, distribution, publication, presentation,
-or derivative work based on this project must provide appropriate credit to the
-original author:
-
-Jason Soo Weng Jyh (jyhtonix)
-Agentic AI Security Harness
-GitHub: https://github.com/jyhtonix/agentic-ai-harness
-
-2. Educational and Research Use
-
-This project may be used for:
-
-- cybersecurity education
-- academic research
-- student learning activities
-- cybersecurity training
-- demonstrations and competitions
-
-provided that proper attribution is maintained.
-
-3. Commercial Use
-
-Commercial use, resale, incorporation into a commercial product, or use as part
-of a commercial service requires prior permission from the copyright holder.
-
-4. No Claim of Ownership
-
-Any modified or derivative version of this project must not be presented as an
-original work created by another individual or organization.
-
-5. Disclaimer
-
-This software is provided "as is", without warranty of any kind. The author is
-not responsible for any damages, misuse, or unauthorized application of this
-software.
-
-6. Competition and Evaluation Use
-
-Competition organizers, judges, reviewers, and academic institutions may access,
-review, and evaluate this project for legitimate assessment purposes, provided
-that the original authorship and attribution remain acknowledged.
-
----
-
-By using this project, users agree to preserve attribution to the original
-author and acknowledge the contribution of Jason Soo Weng Jyh (jyhtonix).
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
