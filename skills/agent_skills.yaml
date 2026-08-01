@@ -19,7 +19,7 @@ skills:
     category: malware
     agent: "agents.team.specialists.malware_agent:MalwareAnalysisAgent"
     prompt: "prompts/malware_expert.md"
-    keywords: [malware, virus, trojan, ransomware, backdoor, payload, pe file, exe, dll]
+    keywords: [malware, virus, trojan, ransomware, backdoor, payload, pe file, pe header, windows executable, executable, dll, dll analysis, dynamic link library]
     capabilities:
       - pe_analysis
       - ioc_extraction
@@ -127,5 +127,176 @@ skills:
       - cloud_deployment_analysis
       - monitoring_logging_analysis
       - secure_devops_review
+    version: "1.0"
+    enabled: true
+
+  - name: web_exploitation
+    category: web_exploitation
+    agent: "agents.team.specialists.web_exploit_agent:WebExploitAgent"
+    prompt: "prompts/web_exploitation_expert.md"
+    keywords:
+      - exploitation
+      - exploit
+      - sqli
+      - sql injection
+      - xss
+      - cross-site scripting
+      - ssrf
+      - server-side request forgery
+      - ssti
+      - server-side template injection
+      - template injection
+      - idor
+      - auth bypass
+      - authentication bypass
+      - session attack
+      - jwt
+      - file upload
+      - path traversal
+      - xxe
+      - xml external entity
+      - command injection
+      - request smuggling
+      - api security
+      - prototype pollution
+      - lfi
+      - rfi
+      - burp
+      - sqlmap
+      - ffuf
+      - gobuster
+      - nuclei
+    capabilities:
+      - challenge_reconnaissance
+      - http_analysis
+      - application_mapping
+      - attack_surface_identification
+      - sql_injection_analysis
+      - xss_analysis
+      - ssrf_analysis
+      - ssti_analysis
+      - idor_analysis
+      - auth_bypass_analysis
+      - session_attack_analysis
+      - jwt_analysis
+      - file_upload_analysis
+      - path_traversal_analysis
+      - xxe_analysis
+      - api_security_testing
+      - command_injection_analysis
+      - exploit_verification
+    version: "1.0"
+    enabled: true
+
+  - name: binary_reverse
+    category: binary_reverse
+    agent: "agents.team.specialists.binary_reverse_agent:BinaryReverseAgent"
+    prompt: "prompts/binary_reverse_expert.md"
+    keywords:
+      - binary
+      - reverse engineering
+      - reverse engineer
+      - elf
+      - pe file
+      - pe header
+      - pe binary
+      - portable executable
+      - portable executable format
+      - ghidra
+      - ida
+      - x64dbg
+      - objdump
+      - strings
+      - readelf
+      - radare2
+      - angr
+      - disassembly
+      - decompile
+      - decompilation
+      - assembly
+      - x86
+      - x64
+      - x86_64
+      - x86-64
+      - amd64
+      - calling convention
+      - symbol
+      - obfuscation
+      - obfuscate
+      - packing
+      - upx
+      - packed
+      - anti-debug
+      - anti-debugging
+      - crackme
+      - gdb
+      - debugger
+      - bytecode
+      - firmware
+    capabilities:
+      - file_identification
+      - elf_analysis
+      - pe_analysis
+      - static_analysis
+      - dynamic_analysis
+      - function_identification
+      - control_flow_analysis
+      - decompilation
+      - assembly_analysis
+      - calling_convention_analysis
+      - symbol_analysis
+      - obfuscation_analysis
+      - packing_analysis
+      - anti_debugging_analysis
+      - malware_style_analysis
+    version: "1.0"
+    enabled: true
+
+  - name: pwn
+    category: pwn
+    agent: "agents.team.specialists.pwn_agent:PwnAgent"
+    prompt: "prompts/pwn_expert.md"
+    keywords:
+      - pwn
+      - pwntools
+      - rop
+      - ret2libc
+      - ret2win
+      - ret2csu
+      - stack overflow
+      - heap exploitation
+      - memory corruption
+      - buffer overflow
+      - format string
+      - use-after-free
+      - shellcode
+      - aslr
+      - nx enabled
+      - non executable stack
+      - stack canary
+      - pie enabled
+      - canary
+      - checksec
+      - binary exploitation
+      - overflow
+    capabilities:
+      - binary_protection_analysis
+      - vulnerability_identification
+      - stack_overflow_analysis
+      - heap_exploitation_analysis
+      - memory_corruption_analysis
+      - buffer_overflow_analysis
+      - format_string_analysis
+      - use_after_free_analysis
+      - rop_chain_development
+      - ret2libc_strategy
+      - shellcode_development
+      - aslr_bypass
+      - nx_bypass
+      - pie_bypass
+      - canary_bypass
+      - exploit_strategy
+      - local_testing
+      - remote_challenge_analysis
     version: "1.0"
     enabled: true

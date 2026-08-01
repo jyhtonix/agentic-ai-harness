@@ -8,7 +8,10 @@ Covers:
   - register_agent adoption of live specialist instances
   - load_agent instantiation from import paths
   - YAML-backed registry loading and parity with CATEGORY_KEYWORDS
-  - CoordinatorAgent routing through the registry (incl. DevOps)
+  - CoordinatorAgent routing through the registry (incl. DevOps, Web Exploitation)
+  - Web Exploitation Agent classification, findings, and dispatch
+  - Binary Reverse Engineering Agent classification, findings, and dispatch
+  - Pwn Agent classification, findings, and dispatch
   - Backward compatibility of the no-arg CoordinatorAgent
 """
 
@@ -20,11 +23,14 @@ from agents.team.skill_registry import (
     SkillRegistry,
     load_skill_registry,
 )
+from agents.team.specialists.binary_reverse_agent import BinaryReverseAgent
 from agents.team.specialists.crypto_agent import CryptoAgent
 from agents.team.specialists.devops_agent import DevOpsAgent
 from agents.team.specialists.forensics_agent import ForensicsAgent
 from agents.team.specialists.malware_agent import MalwareAnalysisAgent
+from agents.team.specialists.pwn_agent import PwnAgent
 from agents.team.specialists.web_agent import WebSecurityAgent
+from agents.team.specialists.web_exploit_agent import WebExploitAgent
 
 ALL_AGENTS = [
     MalwareAnalysisAgent(),
@@ -32,6 +38,9 @@ ALL_AGENTS = [
     CryptoAgent(),
     ForensicsAgent(),
     DevOpsAgent(),
+    WebExploitAgent(),
+    BinaryReverseAgent(),
+    PwnAgent(),
 ]
 
 
@@ -193,7 +202,7 @@ class TestLoadSkillRegistry:
     def test_loads_all_definitions(self):
         r = load_skill_registry()
         names = {d.name for d in r.list_skills()}
-        assert {"malware", "web", "crypto", "forensics", "devops"} <= names
+        assert {"malware", "web", "crypto", "forensics", "devops", "web_exploitation", "binary_reverse", "pwn"} <= names
 
     def test_devops_entry_complete(self):
         r = load_skill_registry()
@@ -203,6 +212,51 @@ class TestLoadSkillRegistry:
         assert d.prompt == "prompts/devops_expert.md"
         assert "kubernetes" in d.keywords
         assert "ci_cd_pipeline_analysis" in d.capabilities
+        assert d.version == "1.0"
+        assert d.enabled is True
+
+    def test_web_exploitation_entry_complete(self):
+        r = load_skill_registry()
+        d = r.get("web_exploitation")
+        assert d is not None
+        assert d.name == "web_exploitation"
+        assert d.agent == "agents.team.specialists.web_exploit_agent:WebExploitAgent"
+        assert d.prompt == "prompts/web_exploitation_expert.md"
+        assert "sqli" in d.keywords
+        assert "ssti" in d.keywords
+        assert "sql_injection_analysis" in d.capabilities
+        assert "exploit_verification" in d.capabilities
+        assert d.version == "1.0"
+        assert d.enabled is True
+
+    def test_binary_reverse_entry_complete(self):
+        r = load_skill_registry()
+        d = r.get("binary_reverse")
+        assert d is not None
+        assert d.name == "binary_reverse"
+        assert d.agent == "agents.team.specialists.binary_reverse_agent:BinaryReverseAgent"
+        assert d.prompt == "prompts/binary_reverse_expert.md"
+        assert "ghidra" in d.keywords
+        assert "anti-debug" in d.keywords
+        assert "elf_analysis" in d.capabilities
+        assert "decompilation" in d.capabilities
+        assert "anti_debugging_analysis" in d.capabilities
+        assert d.version == "1.0"
+        assert d.enabled is True
+
+    def test_pwn_entry_complete(self):
+        r = load_skill_registry()
+        d = r.get("pwn")
+        assert d is not None
+        assert d.name == "pwn"
+        assert d.agent == "agents.team.specialists.pwn_agent:PwnAgent"
+        assert d.prompt == "prompts/pwn_expert.md"
+        assert "pwntools" in d.keywords
+        assert "ret2libc" in d.keywords
+        assert "format string" in d.keywords
+        assert "stack_overflow_analysis" in d.capabilities
+        assert "rop_chain_development" in d.capabilities
+        assert "remote_challenge_analysis" in d.capabilities
         assert d.version == "1.0"
         assert d.enabled is True
 
@@ -226,6 +280,180 @@ class TestLoadSkillRegistry:
             from_yaml = r.classify(sample)
             from_legacy = SkillRegistry(fallback_keywords=CATEGORY_KEYWORDS).classify(sample)
             assert from_yaml == from_legacy, sample
+
+
+# ===================================================================
+# Word-boundary-aware classification (regression tests)
+# ===================================================================
+
+class TestWordBoundaryClassification:
+    """Keywords must match as whole words, not as substrings of larger tokens."""
+
+    # --- Positive: keywords embedded in text must still route ---
+
+    @pytest.mark.parametrize("registry", [
+        pytest.param(load_skill_registry(), id="yaml"),
+        pytest.param(SkillRegistry(fallback_keywords=CATEGORY_KEYWORDS), id="legacy"),
+    ])
+    def test_elf_binary_routes_to_binary_reverse(self, registry):
+        cats = registry.classify("Analyze this ELF binary using Ghidra")
+        assert "binary_reverse" in cats
+        assert cats["binary_reverse"] == max(cats.values())
+
+    @pytest.mark.parametrize("registry", [
+        pytest.param(load_skill_registry(), id="yaml"),
+        pytest.param(SkillRegistry(fallback_keywords=CATEGORY_KEYWORDS), id="legacy"),
+    ])
+    def test_sql_injection_routes_to_web_exploitation(self, registry):
+        cats = registry.classify("Exploit SQL injection vulnerability")
+        assert "web_exploitation" in cats
+
+    @pytest.mark.parametrize("registry", [
+        pytest.param(load_skill_registry(), id="yaml"),
+        pytest.param(SkillRegistry(fallback_keywords=CATEGORY_KEYWORDS), id="legacy"),
+    ])
+    def test_rop_chain_routes_to_pwn(self, registry):
+        cats = registry.classify("Perform ROP chain exploitation")
+        assert "pwn" in cats
+        assert cats["pwn"] == max(cats.values())
+
+    # --- Negative: keyword as a substring must NOT route ---
+
+    @pytest.mark.parametrize("registry", [
+        pytest.param(load_skill_registry(), id="yaml"),
+        pytest.param(SkillRegistry(fallback_keywords=CATEGORY_KEYWORDS), id="legacy"),
+    ])
+    def test_login_is_not_forensics(self, registry):
+        cats = registry.classify("Check the login page")
+        assert "forensics" not in cats
+
+    @pytest.mark.parametrize("registry", [
+        pytest.param(load_skill_registry(), id="yaml"),
+        pytest.param(SkillRegistry(fallback_keywords=CATEGORY_KEYWORDS), id="legacy"),
+    ])
+    def test_unix_is_not_pwn(self, registry):
+        cats = registry.classify("Analyze the unix system")
+        assert "pwn" not in cats
+
+    @pytest.mark.parametrize("registry", [
+        pytest.param(load_skill_registry(), id="yaml"),
+        pytest.param(SkillRegistry(fallback_keywords=CATEGORY_KEYWORDS), id="legacy"),
+    ])
+    def test_myself_is_not_binary_reverse(self, registry):
+        cats = registry.classify("Review myself application")
+        assert "binary_reverse" not in cats
+
+
+# ===================================================================
+# Registry-based routing through the Coordinator
+# ===================================================================
+
+class TestWebExploitAgent:
+    def test_identity(self):
+        agent = WebExploitAgent()
+        assert agent.name == "web_exploit_agent"
+        assert agent.category == "web_exploitation"
+        assert "sql_injection_analysis" in agent.capabilities
+        assert "exploit_verification" in agent.capabilities
+
+    @pytest.mark.asyncio
+    async def test_analyze_sql_injection(self):
+        agent = WebExploitAgent()
+        result = await agent.analyze("Probe the login endpoint for SQL injection")
+        assert result.agent_name == "web_exploit_agent"
+        assert result.category == "web_exploitation"
+        assert any("SQL injection" in f for f in result.findings)
+        assert "sqlmap" in result.tools_used
+
+    @pytest.mark.asyncio
+    async def test_analyze_ssti(self):
+        agent = WebExploitAgent()
+        result = await agent.analyze("Template injection on the order page")
+        assert any("SSTI" in f for f in result.findings)
+        assert result.confidence >= 0.5
+
+    @pytest.mark.asyncio
+    async def test_analyze_generic(self):
+        agent = WebExploitAgent()
+        result = await agent.analyze("Look at this application")
+        assert result.findings
+        assert "curl" in result.tools_used
+
+
+class TestBinaryReverseAgent:
+    def test_identity(self):
+        agent = BinaryReverseAgent()
+        assert agent.name == "binary_reverse_agent"
+        assert agent.category == "binary_reverse"
+        assert "elf_analysis" in agent.capabilities
+        assert "pe_analysis" in agent.capabilities
+        assert "decompilation" in agent.capabilities
+
+    @pytest.mark.asyncio
+    async def test_analyze_elf_binary(self):
+        agent = BinaryReverseAgent()
+        result = await agent.analyze("Reverse engineer this ELF binary to find the flag")
+        assert result.agent_name == "binary_reverse_agent"
+        assert result.category == "binary_reverse"
+        assert any("ELF" in f for f in result.findings)
+        assert "readelf" in result.tools_used
+
+    @pytest.mark.asyncio
+    async def test_analyze_obfuscated_binary(self):
+        agent = BinaryReverseAgent()
+        result = await agent.analyze("Deobfuscate the packed UPX binary with anti-debugging checks")
+        assert any("Obfuscation" in f for f in result.findings)
+        assert any("Packing" in f for f in result.findings)
+        assert any("Anti-debugging" in f for f in result.findings)
+        assert result.confidence >= 0.5
+
+    @pytest.mark.asyncio
+    async def test_analyze_generic(self):
+        agent = BinaryReverseAgent()
+        result = await agent.analyze("Look at this file")
+        assert result.findings
+        assert "strings" in result.tools_used
+
+
+class TestPwnAgent:
+    def test_identity(self):
+        agent = PwnAgent()
+        assert agent.name == "pwn_agent"
+        assert agent.category == "pwn"
+        assert "stack_overflow_analysis" in agent.capabilities
+        assert "rop_chain_development" in agent.capabilities
+        assert "use_after_free_analysis" in agent.capabilities
+
+    @pytest.mark.asyncio
+    async def test_analyze_buffer_overflow(self):
+        agent = PwnAgent()
+        result = await agent.analyze("Find the offset and exploit the buffer overflow to call win")
+        assert result.agent_name == "pwn_agent"
+        assert result.category == "pwn"
+        assert any("Stack/buffer overflow" in f for f in result.findings)
+        assert "pwntools" in result.tools_used
+
+    @pytest.mark.asyncio
+    async def test_analyze_format_string(self):
+        agent = PwnAgent()
+        result = await agent.analyze("Leak the canary with a format string on the server")
+        assert any("Format string" in f for f in result.findings)
+        assert result.confidence >= 0.5
+
+    @pytest.mark.asyncio
+    async def test_analyze_rop_ret2libc(self):
+        agent = PwnAgent()
+        result = await agent.analyze("Build a ROP chain to ret2libc and leak libc with pwntools")
+        assert any("ROP" in f for f in result.findings)
+        assert any("ret2libc" in f for f in result.findings)
+        assert "ROPgadget" in result.tools_used
+
+    @pytest.mark.asyncio
+    async def test_analyze_generic(self):
+        agent = PwnAgent()
+        result = await agent.analyze("Look at this binary")
+        assert result.findings
+        assert "pwntools" in result.tools_used
 
 
 # ===================================================================
@@ -285,3 +513,117 @@ class TestRegistryRouting:
         coordinator = CoordinatorAgent(skill_registry=registry)
         agent = coordinator.skill_registry.load_agent("devops")
         assert isinstance(agent, DevOpsAgent)
+
+    @pytest.mark.asyncio
+    async def test_coordinator_routes_web_exploitation_via_registry(self):
+        registry = load_skill_registry()
+        coordinator = CoordinatorAgent(skill_registry=registry)
+        coordinator.register_specialists(ALL_AGENTS)
+
+        result = await coordinator.coordinate(
+            "Find the SQL injection and perform SSTI template injection exploitation"
+        )
+        assert "web_exploit_agent" in result["agents_dispatched"]
+        assert result["categories_identified"].get("web_exploitation", 0) > 0
+
+    @pytest.mark.asyncio
+    async def test_coordinator_registry_dispatches_only_web_exploitation(self):
+        registry = load_skill_registry()
+        coordinator = CoordinatorAgent(skill_registry=registry)
+        coordinator.register_specialists(ALL_AGENTS)
+
+        result = await coordinator.coordinate(
+            "Perform SSRF exploitation against the internal service"
+        )
+        assert result["agents_dispatched"] == ["web_exploit_agent"]
+
+    @pytest.mark.asyncio
+    async def test_web_exploitation_does_not_break_existing_routing(self):
+        registry = load_skill_registry()
+        coordinator = CoordinatorAgent(skill_registry=registry)
+        coordinator.register_specialists(ALL_AGENTS)
+
+        result = await coordinator.coordinate("Decrypt this RSA key")
+        assert result["agents_dispatched"] == ["crypto_agent"]
+
+    @pytest.mark.asyncio
+    async def test_web_exploitation_uses_yaml_keywords(self):
+        registry = load_skill_registry()
+        assert "web_exploitation" in CATEGORY_KEYWORDS
+        assert set(registry.keywords_for("web_exploitation")) == set(CATEGORY_KEYWORDS["web_exploitation"])
+
+    @pytest.mark.asyncio
+    async def test_coordinator_routes_binary_reverse_via_registry(self):
+        registry = load_skill_registry()
+        coordinator = CoordinatorAgent(skill_registry=registry)
+        coordinator.register_specialists(ALL_AGENTS)
+
+        result = await coordinator.coordinate(
+            "Reverse engineer this ELF binary with Ghidra and objdump"
+        )
+        assert "binary_reverse_agent" in result["agents_dispatched"]
+        assert result["categories_identified"].get("binary_reverse", 0) > 0
+
+    @pytest.mark.asyncio
+    async def test_coordinator_registry_dispatches_only_binary_reverse(self):
+        registry = load_skill_registry()
+        coordinator = CoordinatorAgent(skill_registry=registry)
+        coordinator.register_specialists(ALL_AGENTS)
+
+        result = await coordinator.coordinate(
+            "Deobfuscate the packed UPX binary with anti-debugging"
+        )
+        assert result["agents_dispatched"] == ["binary_reverse_agent"]
+
+    @pytest.mark.asyncio
+    async def test_binary_reverse_does_not_break_existing_routing(self):
+        registry = load_skill_registry()
+        coordinator = CoordinatorAgent(skill_registry=registry)
+        coordinator.register_specialists(ALL_AGENTS)
+
+        result = await coordinator.coordinate("Decrypt this AES key")
+        assert result["agents_dispatched"] == ["crypto_agent"]
+
+    @pytest.mark.asyncio
+    async def test_binary_reverse_uses_yaml_keywords(self):
+        registry = load_skill_registry()
+        assert "binary_reverse" in CATEGORY_KEYWORDS
+        assert set(registry.keywords_for("binary_reverse")) == set(CATEGORY_KEYWORDS["binary_reverse"])
+
+    @pytest.mark.asyncio
+    async def test_coordinator_routes_pwn_via_registry(self):
+        registry = load_skill_registry()
+        coordinator = CoordinatorAgent(skill_registry=registry)
+        coordinator.register_specialists(ALL_AGENTS)
+
+        result = await coordinator.coordinate(
+            "Exploit the stack overflow on the pwn challenge with pwntools"
+        )
+        assert "pwn_agent" in result["agents_dispatched"]
+        assert result["categories_identified"].get("pwn", 0) > 0
+
+    @pytest.mark.asyncio
+    async def test_coordinator_registry_dispatches_only_pwn(self):
+        registry = load_skill_registry()
+        coordinator = CoordinatorAgent(skill_registry=registry)
+        coordinator.register_specialists(ALL_AGENTS)
+
+        result = await coordinator.coordinate(
+            "Leak the canary with a format string, then ret2libc with pwntools"
+        )
+        assert result["agents_dispatched"] == ["pwn_agent"]
+
+    @pytest.mark.asyncio
+    async def test_pwn_does_not_break_existing_routing(self):
+        registry = load_skill_registry()
+        coordinator = CoordinatorAgent(skill_registry=registry)
+        coordinator.register_specialists(ALL_AGENTS)
+
+        result = await coordinator.coordinate("Recover this steganography image")
+        assert result["agents_dispatched"] == ["forensics_agent"]
+
+    @pytest.mark.asyncio
+    async def test_pwn_uses_yaml_keywords(self):
+        registry = load_skill_registry()
+        assert "pwn" in CATEGORY_KEYWORDS
+        assert set(registry.keywords_for("pwn")) == set(CATEGORY_KEYWORDS["pwn"])

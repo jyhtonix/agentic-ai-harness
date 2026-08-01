@@ -35,7 +35,9 @@ from __future__ import annotations
 
 import importlib
 import logging
+import re
 from dataclasses import dataclass, field
+from functools import lru_cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
@@ -208,6 +210,17 @@ class SkillRegistry:
     # Classification / routing
     # ------------------------------------------------------------------
 
+    @staticmethod
+    @lru_cache(maxsize=1024)
+    def _keyword_pattern(keyword: str) -> "re.Pattern":
+        """
+        Compile a word-boundary-aware regex for a keyword.
+
+        Word boundaries (`\\b`) prevent substring false positives:
+        "elf" no longer matches "myself", but still matches "ELF binary".
+        """
+        return re.compile(rf"\b{re.escape(keyword)}\b")
+
     def classify(self, text: str) -> dict[str, float]:
         """
         Score a task against registered keyword sets.
@@ -216,12 +229,21 @@ class SkillRegistry:
         keyword match contributes 2.0; scores are normalized to weights
         and sorted descending. Falls back to {"general": 1.0} when no
         category matches.
+
+        Matching is word-boundary aware: a keyword matches only when it
+        appears as a whole word (or phrase), not as a substring of a
+        larger token. E.g. "elf" matches "ELF binary" but not "myself".
         """
         text = text.lower()
 
         scores: dict[str, float] = {}
         for category in self.categories():
-            score = sum(2.0 if kw in text else 0.0 for kw in self.keywords_for(category))
+            keywords = self.keywords_for(category)
+            score = sum(
+                2.0
+                for kw in keywords
+                if self._keyword_pattern(kw).search(text)
+            )
             if score > 0:
                 scores[category] = score
 
