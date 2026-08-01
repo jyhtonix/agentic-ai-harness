@@ -260,5 +260,131 @@ classify -> {'devops': 1.0}
 agents_dispatched -> ['devops_agent']
 ```
 
+---
+
+## Example: Web Exploitation Routing
+
+The `web_exploitation` skill routes web-CTF/offensive web requests to
+`WebExploitAgent` (`agents/team/specialists/web_exploit_agent.py`):
+
+```
+"Probe the login endpoint for SQL injection, then exploit the SSTI"
+                    |
+                    v
+classify -> {'web_exploitation': 1.0}
+                    |
+                    v
+agents_dispatched -> ['web_exploit_agent']
+```
+
+The agent covers a recon→hypothesis→verify workflow across injection,
+access-control, client-side, and application-level vulnerability classes,
+and advertises tooling such as `sqlmap`, `ffuf`, `gobuster`, `nuclei`,
+and `burp` for each analyzed surface.
+
+### How Web Exploitation was added
+
+The agent follows the standard "Adding a New Agent" steps above:
+
+| Step | Artifact |
+|------|----------|
+| Specialist class | `agents/team/specialists/web_exploit_agent.py` — `WebExploitAgent` (category `web_exploitation`) |
+| Expert prompt | `prompts/web_exploitation_expert.md` — workflow + vulnerability + tooling guidance |
+| YAML registration | `skills/agent_skills.yaml` — `web_exploitation` entry with keywords/capabilities |
+| Legacy fallback | `CATEGORY_KEYWORDS["web_exploitation"]` in `coordinator.py` kept in sync with the YAML keywords |
+| Tests | `test_agent_skill_registry.py::TestWebExploitAgent` + routing cases in `TestRegistryRouting` |
+
+The parity test `test_yaml_keywords_match_category_keywords` enforces that
+the YAML keywords and the `CATEGORY_KEYWORDS` fallback stay identical, so
+both routing paths classify identically.
+
+See `tests/test_agent_skill_registry.py::TestRegistryRouting` for the
+full registry-based routing tests.
+
+---
+
+## Example: Binary Reverse Engineering Routing
+
+The `binary_reverse` skill routes binary-reverse-engineering / CTF binary
+challenges to `BinaryReverseAgent`
+(`agents/team/specialists/binary_reverse_agent.py`):
+
+```
+"Reverse engineer this ELF binary with Ghidra and objdump"
+                    |
+                    v
+classify -> {'binary_reverse': 1.0}
+                    |
+                    v
+agents_dispatched -> ['binary_reverse_agent']
+```
+
+The agent drives an identify→static→dynamic→decompile workflow across ELF
+and PE targets, covering assembly basics, calling conventions, symbols,
+obfuscation, packing, anti-debugging, and malware-style analysis. It
+advertises tooling such as `ghidra`, `ida`, `x64dbg`, `objdump`, `strings`,
+`readelf`, `radare2`, and `angr`.
+
+### How Binary Reverse Engineering was added
+
+The agent follows the standard "Adding a New Agent" steps above:
+
+| Step | Artifact |
+|------|----------|
+| Specialist class | `agents/team/specialists/binary_reverse_agent.py` — `BinaryReverseAgent` (category `binary_reverse`) |
+| Expert prompt | `prompts/binary_reverse_expert.md` — workflow + topics + tooling guidance |
+| YAML registration | `skills/agent_skills.yaml` — `binary_reverse` entry with keywords/capabilities |
+| Legacy fallback | `CATEGORY_KEYWORDS["binary_reverse"]` in `coordinator.py` kept in sync with the YAML keywords |
+| Tests | `test_agent_skill_registry.py::TestBinaryReverseAgent` + routing cases in `TestRegistryRouting` |
+
+Keywords were chosen to avoid substring collisions with existing categories
+(e.g. no bare `pe`, `arm`, or `vm` tokens), and the parity test
+`test_yaml_keywords_match_category_keywords` keeps the YAML keywords and
+the `CATEGORY_KEYWORDS` fallback identical.
+
+See `tests/test_agent_skill_registry.py::TestRegistryRouting` for the
+full registry-based routing tests.
+
+---
+
+## Example: Binary Exploitation (Pwn) Routing
+
+The `pwn` skill routes binary-exploitation / pwn CTF challenges to
+`PwnAgent` (`agents/team/specialists/pwn_agent.py`):
+
+```
+"Leak the canary with a format string, then ret2libc with pwntools"
+                    |
+                    v
+classify -> {'pwn': 1.0}
+                    |
+                    v
+agents_dispatched -> ['pwn_agent']
+```
+
+The agent runs a protections→vulnerability→strategy→local→remote workflow
+across stack/heap corruption, format strings, and use-after-free classes,
+and plans mitigation bypasses for ASLR, NX, PIE, and canaries. It
+advertises exploit-development tooling such as `pwntools`, `ROPgadget`,
+`ropper`, `libc-database`, and `gdb`.
+
+### How Pwn was added
+
+The agent follows the standard "Adding a New Agent" steps above:
+
+| Step | Artifact |
+|------|----------|
+| Specialist class | `agents/team/specialists/pwn_agent.py` — `PwnAgent` (category `pwn`) |
+| Expert prompt | `prompts/pwn_expert.md` — workflow + mitigations + tooling guidance |
+| YAML registration | `skills/agent_skills.yaml` — `pwn` entry with keywords/capabilities |
+| Legacy fallback | `CATEGORY_KEYWORDS["pwn"]` in `coordinator.py` kept in sync with the YAML keywords |
+| Tests | `test_agent_skill_registry.py::TestPwnAgent` + routing cases in `TestRegistryRouting` |
+
+Keywords were chosen to avoid substring collisions with existing categories
+(e.g. no bare `exploit` or `shell` tokens that would collide with
+`web_exploitation`/`malware`), and the parity test
+`test_yaml_keywords_match_category_keywords` keeps the YAML keywords and
+the `CATEGORY_KEYWORDS` fallback identical.
+
 See `tests/test_agent_skill_registry.py::TestRegistryRouting` for the
 full registry-based routing tests.

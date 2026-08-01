@@ -12,7 +12,7 @@ logger = logging.getLogger("agents.team.coordinator")
 # SkillRegistry when no registry is supplied. The central definition file
 # is skills/agent_skills.yaml (see agents/team/skill_registry.py).
 CATEGORY_KEYWORDS = {
-    "malware": ["malware", "virus", "trojan", "ransomware", "backdoor", "payload", "pe file", "exe", "dll"],
+    "malware": ["malware", "virus", "trojan", "ransomware", "backdoor", "payload", "pe file", "pe header", "windows executable", "executable", "dll", "dll analysis", "dynamic link library"],
     "web": ["web", "http", "url", "xss", "sql injection", "csrf", "api", "endpoint", "cookie", "session"],
     "crypto": ["encrypt", "decrypt", "cipher", "hash", "base64", "rsa", "aes", "xor", "crypto", "key"],
     "forensics": ["forensic", "metadata", "exif", "disk image", "memory dump", "artifact", "stego",
@@ -22,6 +22,24 @@ CATEGORY_KEYWORDS = {
                 "terraform", "pulumi", "ansible", "playbook", "infrastructure as code", "iac",
                 "deployment", "deploy", "cloud", "aws", "gcp", "azure",
                 "monitoring", "prometheus", "grafana", "logging", "observability", "gitops"],
+    "web_exploitation": ["exploitation", "exploit", "sqli", "sql injection", "xss",
+                          "cross-site scripting", "ssrf", "server-side request forgery", "ssti",
+                          "server-side template injection", "template injection", "idor",
+                          "auth bypass", "authentication bypass", "session attack", "jwt",
+                          "file upload", "path traversal", "xxe", "xml external entity",
+                          "command injection", "request smuggling", "api security",
+                          "prototype pollution", "lfi", "rfi", "burp", "sqlmap", "ffuf",
+                          "gobuster", "nuclei"],
+    "binary_reverse": ["binary", "reverse engineering", "reverse engineer", "elf", "pe file", "pe header", "pe binary",
+                        "portable executable", "portable executable format", "ghidra", "ida", "x64dbg", "objdump", "strings",
+                        "readelf", "radare2", "angr", "disassembly", "decompile", "decompilation",
+                        "assembly", "x86", "x64", "x86_64", "x86-64", "amd64", "calling convention", "symbol", "obfuscation",
+                        "obfuscate", "packing", "upx", "packed", "anti-debug", "anti-debugging",
+                        "crackme", "gdb", "debugger", "bytecode", "firmware"],
+    "pwn": ["pwn", "pwntools", "rop", "ret2libc", "ret2win", "ret2csu", "stack overflow",
+            "heap exploitation", "memory corruption", "buffer overflow", "format string",
+            "use-after-free", "shellcode", "aslr", "nx enabled", "non executable stack", "stack canary", "pie enabled", "canary", "checksec",
+            "binary exploitation", "overflow"],
 }
 
 

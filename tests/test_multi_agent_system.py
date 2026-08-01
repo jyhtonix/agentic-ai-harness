@@ -584,7 +584,7 @@ class TestIntegration:
             ForensicsAgent(),
         ])
         result = await coordinator.coordinate(
-            "Analyze suspicious file. It's an executable with encoded strings and web traffic."
+            "Analyze suspicious file. It's a malware sample with encoded strings and web traffic."
         )
         assert len(result["agents_dispatched"]) >= 2
         assert len(result["findings"]) >= 2
