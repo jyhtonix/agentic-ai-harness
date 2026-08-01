@@ -76,9 +76,11 @@ docker-volumes/
 # ==============================
 # AI / model files
 # ==============================
-# Local AI model storage
-models/
+# Ignore downloaded AI model weights only
+model_weights/
 *.gguf
+*.safetensors
+*.onnx
 
 # ==============================
 # OpenCode / AI temporary files
