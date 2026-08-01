@@ -1,0 +1,13 @@
+name: Grok 3
+provider: xAI
+model_id: grok-3
+temperature: 0.3
+max_tokens: 4096
+available_tools:
+  - python
+  - strings
+  - file
+  - curl
+notes: >
+  Fast inference with broad knowledge base.
+  Good for pattern recognition in CTF challenges.

@@ -1,0 +1,13 @@
+name: Kimi K2
+provider: Moonshot AI
+model_id: kimi-k2
+temperature: 0.3
+max_tokens: 4096
+available_tools:
+  - python
+  - strings
+  - file
+  - curl
+notes: >
+  Strong Chinese-language reasoning with good technical knowledge.
+  Suitable for CTF challenges with cryptographic components.

@@ -1,0 +1,15 @@
+name: Claude 4 Sonnet
+provider: Anthropic
+model_id: claude-sonnet-4-20250514
+temperature: 0.3
+max_tokens: 8192
+available_tools:
+  - python
+  - strings
+  - file
+  - curl
+  - exiftool
+  - yara
+notes: >
+  Strong analytical reasoning with excellent CTF performance.
+  Longer context window for multi-step analysis.
