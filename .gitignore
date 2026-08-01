@@ -29,6 +29,14 @@ venv/
 *.egg-info/
 
 # ==============================
+# Python tooling cache
+# ==============================
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ==============================
 # Build files
 # ==============================
 dist/
@@ -68,8 +76,8 @@ docker-volumes/
 # ==============================
 # AI / model files
 # ==============================
+# Local AI model storage
 models/
-*.bin
 *.gguf
 
 # ==============================
@@ -96,6 +104,7 @@ models/
 *.idb
 *.i64
 *.til
+
 ghidra_projects/
 ida_projects/
 binary_ninja_projects/
@@ -103,34 +112,35 @@ binary_ninja_projects/
 # ==============================
 # CTF temporary files
 # ==============================
+
 # Password dictionaries
 rockyou*
 *.wordlist
 
-# Flag / exploit outputs
-flag*
-flags/
+# Flag / exploit output files
 *.flag
 
-# Challenge extraction files
-*.tar
-*.tar.gz
-*.zip
-*.7z
+# Web session artifacts
+**/*cookie*.txt
 
-# Network / session data
-cookies.txt
-*.pcap
-*.pcapng
-
-# Web exploitation session artifacts
-solutions/cookies*.txt
+# Temporary packet captures
+*_tmp.pcap
+*_tmp.pcapng
+capture_tmp*.pcap
+capture_tmp*.pcapng
 
 # Temporary challenge analysis files
 ctfbody.json
 disasm.txt
 cj.txt
 cj2.txt
+
+# Temporary files generated during analysis
+**/*.tmp
+**/*.bak
+**/core
+**/core.*
+**/.DS_Store
 
 # ==============================
 # CTF working directories
@@ -155,3 +165,18 @@ core.*
 # ==============================
 tmp/
 scratch/
+
+# ==============================
+# Personal CTF solving scripts
+# ==============================
+chk_*.py
+sice_*.py
+ssh_*.py
+crack.py
+portcheck.py
+symfind.py
+runtrials.sh
+
+# Local exploit helpers / generated hashes
+flaghasher
+flaghasher_b64.txt
