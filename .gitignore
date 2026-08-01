@@ -123,6 +123,9 @@ cookies.txt
 *.pcap
 *.pcapng
 
+# Web exploitation session artifacts
+solutions/cookies*.txt
+
 # Temporary challenge analysis files
 ctfbody.json
 disasm.txt
