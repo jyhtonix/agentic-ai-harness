@@ -94,5 +94,37 @@
     "failure_type": "unknown",
     "recommendation": "Review crypto challenge analysis pipeline.",
     "recorded_at": "2026-07-30T15:14:28.519621+00:00"
+  },
+  {
+    "challenge_id": "c1",
+    "category": "crypto",
+    "reason": "missing skill for RSA",
+    "failure_type": "missing_skill",
+    "recommendation": "Add skills for crypto challenges. Review skill registry for gaps in h difficulty.",
+    "recorded_at": "2026-08-01T01:56:47.365670+00:00"
+  },
+  {
+    "challenge_id": "c2",
+    "category": "malware",
+    "reason": "missing pe analysis",
+    "failure_type": "unknown",
+    "recommendation": "Review malware challenge analysis pipeline.",
+    "recorded_at": "2026-08-01T01:56:47.448220+00:00"
+  },
+  {
+    "challenge_id": "c1",
+    "category": "crypto",
+    "reason": "missing skill",
+    "failure_type": "missing_skill",
+    "recommendation": "Add skills for crypto challenges. Review skill registry for gaps in m difficulty.",
+    "recorded_at": "2026-08-01T01:56:47.556532+00:00"
+  },
+  {
+    "challenge_id": "c1",
+    "category": "crypto",
+    "reason": "missing RSA skill",
+    "failure_type": "unknown",
+    "recommendation": "Review crypto challenge analysis pipeline.",
+    "recorded_at": "2026-08-01T01:56:47.622348+00:00"
   }
 ]

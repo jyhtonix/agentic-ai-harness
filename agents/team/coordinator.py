@@ -4,28 +4,52 @@ from typing import Optional
 from agents.team.communication import TeamMessage, MessageType
 from agents.team.evidence import EvidencePool, AgentFinding
 from agents.team.specialists import SpecialistAgent
+from agents.team.skill_registry import SkillRegistry
 
 logger = logging.getLogger("agents.team.coordinator")
 
+# Backward-compatibility keyword map. Used as the fallback source for the
+# SkillRegistry when no registry is supplied. The central definition file
+# is skills/agent_skills.yaml (see agents/team/skill_registry.py).
 CATEGORY_KEYWORDS = {
     "malware": ["malware", "virus", "trojan", "ransomware", "backdoor", "payload", "pe file", "exe", "dll"],
     "web": ["web", "http", "url", "xss", "sql injection", "csrf", "api", "endpoint", "cookie", "session"],
     "crypto": ["encrypt", "decrypt", "cipher", "hash", "base64", "rsa", "aes", "xor", "crypto", "key"],
     "forensics": ["forensic", "metadata", "exif", "disk image", "memory dump", "artifact", "stego",
                    "steganography", "hidden", "timeline", "log", "carving"],
+    "devops": ["devops", "docker", "container", "compose", "kubernetes", "k8s", "helm",
+                "pipeline", "ci/cd", "cicd", "github actions", "jenkins", "gitlab ci",
+                "terraform", "pulumi", "ansible", "playbook", "infrastructure as code", "iac",
+                "deployment", "deploy", "cloud", "aws", "gcp", "azure",
+                "monitoring", "prometheus", "grafana", "logging", "observability", "gitops"],
 }
 
 
 class CoordinatorAgent:
     name = "coordinator_agent"
 
-    def __init__(self, specialists: Optional[dict[str, SpecialistAgent]] = None):
+    def __init__(
+        self,
+        specialists: Optional[dict[str, SpecialistAgent]] = None,
+        skill_registry: Optional[SkillRegistry] = None,
+    ):
         self.specialists: dict[str, SpecialistAgent] = specialists or {}
+        # Central routing registry. Falls back to CATEGORY_KEYWORDS when no
+        # registry is provided, preserving legacy classification behavior.
+        self._skill_registry: SkillRegistry = skill_registry or SkillRegistry(
+            fallback_keywords=CATEGORY_KEYWORDS
+        )
         self._evidence_pool = EvidencePool()
         self._messages: list[TeamMessage] = []
 
+    @property
+    def skill_registry(self) -> SkillRegistry:
+        """The SkillRegistry used for task classification and routing."""
+        return self._skill_registry
+
     def register_specialist(self, agent: SpecialistAgent) -> None:
         self.specialists[agent.name] = agent
+        self._skill_registry.register_agent(agent)
         logger.info("Registered specialist: %s (category=%s, capabilities=%s)",
                      agent.name, agent.category, agent.capabilities)
 
@@ -70,17 +94,7 @@ class CoordinatorAgent:
             for v in context.values():
                 text += " " + str(v).lower()
 
-        scores: dict[str, float] = {}
-        for category, keywords in CATEGORY_KEYWORDS.items():
-            score = sum(2.0 if kw in text else 0.0 for kw in keywords)
-            if score > 0:
-                scores[category] = score
-
-        if not scores:
-            scores["general"] = 1.0
-
-        total = sum(scores.values()) or 1
-        return {cat: round(s / total, 2) for cat, s in sorted(scores.items(), key=lambda x: x[1], reverse=True)}
+        return self._skill_registry.classify(text)
 
     def _select_agents(self, categories: dict[str, float]) -> list[SpecialistAgent]:
         selected: list[SpecialistAgent] = []

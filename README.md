@@ -283,6 +283,15 @@ Future improvements:
 
 ---
 
+# Documentation
+
+* [Agent Skill Registry — Architecture](docs/AGENT_SKILL_REGISTRY.md)
+  — the central routing registry that maps expert skills to specialist agents.
+* [Release Notes — v0.4.0-agent-skill-registry](docs/releases/v0.4.0-agent-skill-registry.md)
+  — overview, architecture changes, migration notes, and how to add a new specialist agent.
+
+---
+
 # Responsible Use
 
 This project is intended for:

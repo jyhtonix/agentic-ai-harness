@@ -76,5 +76,31 @@
     ],
     "success": true,
     "recorded_at": "2026-07-30T15:14:28.436118+00:00"
+  },
+  {
+    "challenge_id": "c1",
+    "category": "crypto",
+    "difficulty": "m",
+    "approach": "solved_with_strategy_crypto_agent",
+    "tools_used": [
+      "python"
+    ],
+    "agents_used": [
+      "crypto_agent"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-01T01:56:47.295571+00:00"
+  },
+  {
+    "challenge_id": "c1",
+    "category": "crypto",
+    "difficulty": "m",
+    "approach": "solved_with_strategy_crypto_agent",
+    "tools_used": [],
+    "agents_used": [
+      "crypto_agent"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-01T01:56:47.448220+00:00"
   }
 ]

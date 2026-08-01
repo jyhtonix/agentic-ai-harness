@@ -1,0 +1,131 @@
+# Agent Skill Registry
+# Central, editable source of truth for specialist agent routing.
+# Used by agents/team/skill_registry.py (load_skill_registry).
+#
+# Each skill defines:
+#   name          - unique skill identifier
+#   category      - routing category (must match SpecialistAgent.category)
+#   agent         - import path to the agent class "module:ClassName"
+#   prompt        - path to the expert prompt file
+#   keywords      - trigger keywords used for task classification
+#   capabilities  - capability identifiers advertised by the specialist
+#   version       - skill definition version
+#   enabled       - set to false to exclude the skill from routing
+
+version: "1.0"
+
+skills:
+  - name: malware
+    category: malware
+    agent: "agents.team.specialists.malware_agent:MalwareAnalysisAgent"
+    prompt: "prompts/malware_expert.md"
+    keywords: [malware, virus, trojan, ransomware, backdoor, payload, pe file, exe, dll]
+    capabilities:
+      - pe_analysis
+      - ioc_extraction
+      - malware_indicator_analysis
+      - static_analysis
+      - dynamic_analysis_guidance
+    version: "1.0"
+    enabled: true
+
+  - name: web
+    category: web
+    agent: "agents.team.specialists.web_agent:WebSecurityAgent"
+    prompt: "prompts/web_expert.md"
+    keywords: [web, http, url, xss, sql injection, csrf, api, endpoint, cookie, session]
+    capabilities:
+      - http_analysis
+      - vulnerability_pattern_analysis
+      - request_analysis
+      - owasp_top_ten_check
+      - parameter_fuzzing_guidance
+    version: "1.0"
+    enabled: true
+
+  - name: crypto
+    category: crypto
+    agent: "agents.team.specialists.crypto_agent:CryptoAgent"
+    prompt: "prompts/crypto_expert.md"
+    keywords: [encrypt, decrypt, cipher, hash, base64, rsa, aes, xor, crypto, key]
+    capabilities:
+      - encoding_analysis
+      - hash_analysis
+      - rsa_analysis
+      - cipher_identification
+      - key_analysis
+    version: "1.0"
+    enabled: true
+
+  - name: forensics
+    category: forensics
+    agent: "agents.team.specialists.forensics_agent:ForensicsAgent"
+    prompt: "prompts/forensics_expert.md"
+    keywords:
+      - forensic
+      - metadata
+      - exif
+      - disk image
+      - memory dump
+      - artifact
+      - stego
+      - steganography
+      - hidden
+      - timeline
+      - log
+      - carving
+    capabilities:
+      - metadata_analysis
+      - artifact_analysis
+      - evidence_discovery
+      - file_carving_guidance
+      - timeline_analysis
+    version: "1.0"
+    enabled: true
+
+  - name: devops
+    category: devops
+    agent: "agents.team.specialists.devops_agent:DevOpsAgent"
+    prompt: "prompts/devops_expert.md"
+    keywords:
+      - devops
+      - docker
+      - container
+      - compose
+      - kubernetes
+      - k8s
+      - helm
+      - pipeline
+      - ci/cd
+      - cicd
+      - github actions
+      - jenkins
+      - gitlab ci
+      - terraform
+      - pulumi
+      - ansible
+      - playbook
+      - infrastructure as code
+      - iac
+      - deployment
+      - deploy
+      - cloud
+      - aws
+      - gcp
+      - azure
+      - monitoring
+      - prometheus
+      - grafana
+      - logging
+      - observability
+      - gitops
+    capabilities:
+      - docker_container_analysis
+      - kubernetes_analysis
+      - ci_cd_pipeline_analysis
+      - infrastructure_as_code_analysis
+      - cloud_deployment_analysis
+      - monitoring_logging_analysis
+      - secure_devops_review
+    version: "1.0"
+    enabled: true

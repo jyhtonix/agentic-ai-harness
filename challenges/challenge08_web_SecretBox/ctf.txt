@@ -1,0 +1,15 @@
+Secret Box
+Web Exploitation
+This secret box is designed to conceal your secrets.
+
+It's perfectly secure—only you can see what's inside.
+Or can you? Try uncovering the admin's secret.
+
+Browse: 
+http://candy-mountain.picoctf.net:50365/login
+http://candy-mountain.picoctf.net:50365/signup
+http://candy-mountain.picoctf.net:61994/
+
+can you find the secret message?
+
+Hint: How to use sql injection
