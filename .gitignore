@@ -1,10 +1,14 @@
+# ==============================
 # Python cache
+# ==============================
 __pycache__/
 *.pyc
 *.pyo
 .pytest_cache/
 
+# ==============================
 # Environment variables / secrets
+# ==============================
 .env
 .env.*
 !.env.example
@@ -13,55 +17,78 @@ __pycache__/
 secrets/
 credentials/
 
+# ==============================
 # Python virtual environment
+# ==============================
 .venv/
 venv/
 
+# ==============================
 # Python package files
+# ==============================
 *.egg-info/
 
+# ==============================
 # Build files
+# ==============================
 dist/
 build/
 
+# ==============================
 # Database files
+# ==============================
 *.db
 *.sqlite
 *.sqlite3
 
+# ==============================
 # Logs
+# ==============================
 *.log
 logs/
 
+# ==============================
 # IDE settings
+# ==============================
 .idea/
 .vscode/
 
+# ==============================
 # OS files
+# ==============================
 .DS_Store
 Thumbs.db
 
+# ==============================
 # Docker
+# ==============================
 docker-volumes/
 *.pid
 
+# ==============================
 # AI / model files
+# ==============================
 models/
 *.bin
 *.gguf
 
+# ==============================
 # OpenCode / AI temporary files
+# ==============================
 .opencode/
 .opencode-cache/
 .ai/
 
+# ==============================
 # Reverse engineering outputs
+# ==============================
 *.asm
 *.dis
 *.hex
 *.map
 *.dump
 *.strings
+*.lst
 
 # Reverse engineering tools
 *.gpr
@@ -73,6 +100,55 @@ ghidra_projects/
 ida_projects/
 binary_ninja_projects/
 
+# ==============================
+# CTF temporary files
+# ==============================
+# Password dictionaries
+rockyou*
+*.wordlist
+
+# Flag / exploit outputs
+flag*
+flags/
+*.flag
+
+# Challenge extraction files
+*.tar
+*.tar.gz
+*.zip
+*.7z
+
+# Network / session data
+cookies.txt
+*.pcap
+*.pcapng
+
+# Temporary challenge analysis files
+ctfbody.json
+disasm.txt
+cj.txt
+cj2.txt
+
+# ==============================
+# CTF working directories
+# ==============================
+challenge_output/
+challenge_workspace/
+extracted/
+payloads/
+loot/
+
+# ==============================
+# Exploit / debugging artifacts
+# ==============================
+core
+core.*
+*.core
+*.bak
+*.tmp
+
+# ==============================
 # Temporary workspace
+# ==============================
 tmp/
 scratch/
