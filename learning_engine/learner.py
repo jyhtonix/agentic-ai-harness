@@ -28,7 +28,9 @@ class AutonomousLearner:
     ):
         self.failure_analyzer = failure_analyzer or FailureAnalyzer()
         self.skill_gap_detector = skill_gap_detector or SkillGapDetector()
-        self.strategy_evolution = strategy_evolution or StrategyEvolutionEngine()
+        self.strategy_evolution = strategy_evolution or StrategyEvolutionEngine(
+            strategy_memory=strategy_memory
+        )
         self.strategy_memory = strategy_memory or StrategyMemory()
         self.failure_memory = failure_memory or FailureMemory()
         self.solution_memory = solution_memory or SolutionMemory()

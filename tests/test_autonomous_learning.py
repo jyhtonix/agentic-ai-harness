@@ -15,6 +15,7 @@ Covers:
   - Backward compatibility
 """
 
+import contextlib
 import json
 import tempfile
 from pathlib import Path
@@ -30,10 +31,61 @@ from benchmark_engine.metrics import MetricsCollector
 from skills_engine.improvement import SkillImprovementProposal
 from memory.strategy_ranker import StrategyRanker
 from memory.strategies import StrategyMemory
+from memory.failures import FailureMemory
+from memory.solutions import SolutionMemory
 from benchmark_engine.retry import RetryController
 from learning_engine import AutonomousLearner, FeedbackCollector, KnowledgeUpdater
 from competition import CompetitionRunner, Scorer, ScoreEntry, Leaderboard
 from benchmark_engine.improvement_report import ImprovementReportGenerator
+
+
+@contextlib.contextmanager
+def _isolated_strategy_memory():
+    """Yield a StrategyMemory backed by a temporary directory."""
+    with tempfile.TemporaryDirectory() as td:
+        yield StrategyMemory(storage_dir=td)
+
+
+@contextlib.contextmanager
+def _isolated_evolution_engine():
+    """Yield a StrategyEvolutionEngine backed by a temporary store."""
+    with tempfile.TemporaryDirectory() as td:
+        yield StrategyEvolutionEngine(strategy_memory=StrategyMemory(storage_dir=td))
+
+
+@contextlib.contextmanager
+def _isolated_learner():
+    """Yield an AutonomousLearner whose stores all live in a temp dir."""
+    with tempfile.TemporaryDirectory() as td:
+        strategy_memory = StrategyMemory(storage_dir=td)
+        learner = AutonomousLearner(
+            strategy_memory=strategy_memory,
+            failure_memory=FailureMemory(storage_dir=td),
+            solution_memory=SolutionMemory(storage_dir=td),
+            strategy_evolution=StrategyEvolutionEngine(strategy_memory=strategy_memory),
+        )
+        yield learner
+
+
+@contextlib.contextmanager
+def _isolated_updater():
+    """Yield a KnowledgeUpdater whose stores all live in a temp dir."""
+    with tempfile.TemporaryDirectory() as td:
+        updater = KnowledgeUpdater(
+            strategy_memory=StrategyMemory(storage_dir=td),
+            failure_memory=FailureMemory(storage_dir=td),
+            solution_memory=SolutionMemory(storage_dir=td),
+        )
+        yield updater
+
+
+@contextlib.contextmanager
+def _isolated_report_generator():
+    """Yield an ImprovementReportGenerator whose ranker writes to a temp dir."""
+    with tempfile.TemporaryDirectory() as td:
+        strategy_memory = StrategyMemory(storage_dir=td)
+        ranker = StrategyRanker(strategy_memory=strategy_memory, storage_dir=td)
+        yield ImprovementReportGenerator(strategy_ranker=ranker)
 
 
 # ===================================================================
@@ -92,53 +144,53 @@ class TestChallengeAnalyzerAgent:
 
 class TestStrategyEvolutionEngine:
     def test_evolve_empty_results(self):
-        engine = StrategyEvolutionEngine()
-        evolved = engine.evolve("crypto", [])
-        assert len(evolved) >= 1
+        with _isolated_evolution_engine() as engine:
+            evolved = engine.evolve("crypto", [])
+            assert len(evolved) >= 1
 
     def test_evolve_from_successes(self):
-        engine = StrategyEvolutionEngine()
-        results = [
-            BenchmarkResult(challenge_id="c1", category="crypto", difficulty="m",
-                           status="solved", flag_result="PASS", confidence=0.9,
-                           tools_used=["python"], agents_used=["crypto_agent"]),
-            BenchmarkResult(challenge_id="c2", category="crypto", difficulty="m",
-                           status="solved", flag_result="PASS", confidence=0.8,
-                           tools_used=["python"], agents_used=["crypto_agent"]),
-        ]
-        evolved = engine.evolve("crypto", results)
-        assert len(evolved) >= 1
-        assert any("python" in s for s in evolved)
+        with _isolated_evolution_engine() as engine:
+            results = [
+                BenchmarkResult(challenge_id="c1", category="crypto", difficulty="m",
+                               status="solved", flag_result="PASS", confidence=0.9,
+                               tools_used=["python"], agents_used=["crypto_agent"]),
+                BenchmarkResult(challenge_id="c2", category="crypto", difficulty="m",
+                               status="solved", flag_result="PASS", confidence=0.8,
+                               tools_used=["python"], agents_used=["crypto_agent"]),
+            ]
+            evolved = engine.evolve("crypto", results)
+            assert len(evolved) >= 1
+            assert any("python" in s for s in evolved)
 
     def test_evolve_from_failures(self):
-        engine = StrategyEvolutionEngine()
-        results = [
-            BenchmarkResult(challenge_id="c1", category="malware", difficulty="h",
-                           status="failed", flag_result="FAIL", confidence=0.2,
-                           failure_reason="missing PE analysis skill",
-                           failure_category="missing_skill"),
-        ]
-        evolved = engine.evolve("malware", results)
-        assert any("Avoid" in s or "Address" in s for s in evolved)
+        with _isolated_evolution_engine() as engine:
+            results = [
+                BenchmarkResult(challenge_id="c1", category="malware", difficulty="h",
+                               status="failed", flag_result="FAIL", confidence=0.2,
+                               failure_reason="missing PE analysis skill",
+                               failure_category="missing_skill"),
+            ]
+            evolved = engine.evolve("malware", results)
+            assert any("Avoid" in s or "Address" in s for s in evolved)
 
     def test_evolve_strategy_text(self):
-        engine = StrategyEvolutionEngine()
-        text = engine.evolve_strategy_text("crypto", [])
-        assert "Crypto Analysis Strategy:" in text
+        with _isolated_evolution_engine() as engine:
+            text = engine.evolve_strategy_text("crypto", [])
+            assert "Crypto Analysis Strategy:" in text
 
     def test_mixed_results(self):
-        engine = StrategyEvolutionEngine()
-        results = [
-            BenchmarkResult(challenge_id="c1", category="crypto", difficulty="m",
-                           status="solved", flag_result="PASS", confidence=0.9,
-                           tools_used=["python"], agents_used=["crypto_agent"]),
-            BenchmarkResult(challenge_id="c2", category="crypto", difficulty="m",
-                           status="failed", flag_result="FAIL", confidence=0.2,
-                           failure_reason="insufficient reasoning",
-                           failure_category="insufficient_reasoning"),
-        ]
-        evolved = engine.evolve("crypto", results)
-        assert len(evolved) >= 1
+        with _isolated_evolution_engine() as engine:
+            results = [
+                BenchmarkResult(challenge_id="c1", category="crypto", difficulty="m",
+                               status="solved", flag_result="PASS", confidence=0.9,
+                               tools_used=["python"], agents_used=["crypto_agent"]),
+                BenchmarkResult(challenge_id="c2", category="crypto", difficulty="m",
+                               status="failed", flag_result="FAIL", confidence=0.2,
+                               failure_reason="insufficient reasoning",
+                               failure_category="insufficient_reasoning"),
+            ]
+            evolved = engine.evolve("crypto", results)
+            assert len(evolved) >= 1
 
 
 # ===================================================================
@@ -349,57 +401,57 @@ class TestEnhancedRetryController:
 
 class TestAutonomousLearner:
     def test_learn_from_solved(self):
-        learner = AutonomousLearner()
-        r = BenchmarkResult(challenge_id="c1", category="crypto", difficulty="m",
-                           status="solved", flag_result="PASS", confidence=0.9,
-                           tools_used=["python"], agents_used=["crypto_agent"])
-        entry = learner.learn_from_result(r)
-        assert entry["status"] == "solved"
-        assert "recorded_solution" in entry.get("actions_taken", [])
+        with _isolated_learner() as learner:
+            r = BenchmarkResult(challenge_id="c1", category="crypto", difficulty="m",
+                               status="solved", flag_result="PASS", confidence=0.9,
+                               tools_used=["python"], agents_used=["crypto_agent"])
+            entry = learner.learn_from_result(r)
+            assert entry["status"] == "solved"
+            assert "recorded_solution" in entry.get("actions_taken", [])
 
     def test_learn_from_failed(self):
-        learner = AutonomousLearner()
-        r = BenchmarkResult(challenge_id="c1", category="crypto", difficulty="h",
-                           status="failed", flag_result="FAIL",
-                           failure_reason="missing skill for RSA",
-                           failure_category="missing_skill")
-        entry = learner.learn_from_result(r)
-        assert entry["status"] == "failed"
-        assert "detected_skill_gaps" in entry.get("actions_taken", [])
+        with _isolated_learner() as learner:
+            r = BenchmarkResult(challenge_id="c1", category="crypto", difficulty="h",
+                               status="failed", flag_result="FAIL",
+                               failure_reason="missing skill for RSA",
+                               failure_category="missing_skill")
+            entry = learner.learn_from_result(r)
+            assert entry["status"] == "failed"
+            assert "detected_skill_gaps" in entry.get("actions_taken", [])
 
     def test_learn_from_results_batch(self):
-        learner = AutonomousLearner()
-        results = [
-            BenchmarkResult(challenge_id="c1", category="crypto", difficulty="m",
-                           status="solved", flag_result="PASS",
-                           agents_used=["crypto_agent"]),
-            BenchmarkResult(challenge_id="c2", category="malware", difficulty="h",
-                           status="failed", flag_result="FAIL",
-                           failure_reason="missing pe analysis",
-                           failure_category="missing_skill"),
-        ]
-        entries = learner.learn_from_results(results)
-        assert len(entries) == 2
+        with _isolated_learner() as learner:
+            results = [
+                BenchmarkResult(challenge_id="c1", category="crypto", difficulty="m",
+                               status="solved", flag_result="PASS",
+                               agents_used=["crypto_agent"]),
+                BenchmarkResult(challenge_id="c2", category="malware", difficulty="h",
+                               status="failed", flag_result="FAIL",
+                               failure_reason="missing pe analysis",
+                               failure_category="missing_skill"),
+            ]
+            entries = learner.learn_from_results(results)
+            assert len(entries) == 2
 
     def test_get_improvement_summary(self):
-        learner = AutonomousLearner()
-        r = BenchmarkResult(challenge_id="c1", category="crypto", difficulty="m",
-                           status="failed", flag_result="FAIL",
-                           failure_reason="missing skill",
-                           failure_category="missing_skill")
-        learner.learn_from_result(r)
-        summary = learner.get_improvement_summary()
-        assert summary["total_challenges_processed"] >= 1
+        with _isolated_learner() as learner:
+            r = BenchmarkResult(challenge_id="c1", category="crypto", difficulty="m",
+                               status="failed", flag_result="FAIL",
+                               failure_reason="missing skill",
+                               failure_category="missing_skill")
+            learner.learn_from_result(r)
+            summary = learner.get_improvement_summary()
+            assert summary["total_challenges_processed"] >= 1
 
     def test_failure_updates_memory(self):
-        learner = AutonomousLearner()
-        r = BenchmarkResult(challenge_id="c1", category="crypto", difficulty="h",
-                           status="failed", flag_result="FAIL",
-                           failure_reason="missing RSA skill",
-                           failure_category="missing_skill")
-        entry = learner.learn_from_result(r)
-        assert entry.get("failure_analysis") is not None
-        assert entry.get("skill_gaps") is not None
+        with _isolated_learner() as learner:
+            r = BenchmarkResult(challenge_id="c1", category="crypto", difficulty="h",
+                               status="failed", flag_result="FAIL",
+                               failure_reason="missing RSA skill",
+                               failure_category="missing_skill")
+            entry = learner.learn_from_result(r)
+            assert entry.get("failure_analysis") is not None
+            assert entry.get("skill_gaps") is not None
 
 
 # ===================================================================
@@ -451,56 +503,56 @@ class TestFeedbackCollector:
 
 class TestKnowledgeUpdater:
     def test_update_solved(self):
-        updater = KnowledgeUpdater()
-        entry = {
-            "challenge_id": "c1",
-            "category": "crypto",
-            "status": "solved",
-            "actions_taken": ["recorded_solution"],
-        }
-        result = updater.update_from_learning(entry)
-        assert "solution_memory_updated" in result["updates"]
+        with _isolated_updater() as updater:
+            entry = {
+                "challenge_id": "c1",
+                "category": "crypto",
+                "status": "solved",
+                "actions_taken": ["recorded_solution"],
+            }
+            result = updater.update_from_learning(entry)
+            assert "solution_memory_updated" in result["updates"]
 
     def test_update_with_skill_gaps(self):
-        updater = KnowledgeUpdater()
-        entry = {
-            "challenge_id": "c1",
-            "category": "malware",
-            "status": "failed",
-            "actions_taken": ["detected_skill_gaps", "evolved_strategy"],
-            "skill_gaps": {"gaps": ["pe-analysis"], "confidence": 0.85},
-            "evolved_strategy": ["Use PE analysis tools"],
-        }
-        result = updater.update_from_learning(entry)
-        assert "skill_proposal" in " ".join(result["updates"])
-        assert "strategy_memory_evolved" in result["updates"]
+        with _isolated_updater() as updater:
+            entry = {
+                "challenge_id": "c1",
+                "category": "malware",
+                "status": "failed",
+                "actions_taken": ["detected_skill_gaps", "evolved_strategy"],
+                "skill_gaps": {"gaps": ["pe-analysis"], "confidence": 0.85},
+                "evolved_strategy": ["Use PE analysis tools"],
+            }
+            result = updater.update_from_learning(entry)
+            assert "skill_proposal" in " ".join(result["updates"])
+            assert "strategy_memory_evolved" in result["updates"]
 
     def test_get_update_history(self):
-        updater = KnowledgeUpdater()
-        entry = {"challenge_id": "c1", "category": "c", "status": "solved", "actions_taken": []}
-        updater.update_from_learning(entry)
-        history = updater.get_update_history()
-        assert len(history) == 1
+        with _isolated_updater() as updater:
+            entry = {"challenge_id": "c1", "category": "c", "status": "solved", "actions_taken": []}
+            updater.update_from_learning(entry)
+            history = updater.get_update_history()
+            assert len(history) == 1
 
     def test_get_skill_proposals(self):
-        updater = KnowledgeUpdater()
-        entry = {
-            "challenge_id": "c1",
-            "category": "malware",
-            "status": "failed",
-            "actions_taken": ["detected_skill_gaps"],
-            "skill_gaps": {"gaps": ["pe-analysis"], "confidence": 0.8},
-        }
-        updater.update_from_learning(entry)
-        proposals = updater.get_skill_proposals()
-        assert len(proposals) >= 1
+        with _isolated_updater() as updater:
+            entry = {
+                "challenge_id": "c1",
+                "category": "malware",
+                "status": "failed",
+                "actions_taken": ["detected_skill_gaps"],
+                "skill_gaps": {"gaps": ["pe-analysis"], "confidence": 0.8},
+            }
+            updater.update_from_learning(entry)
+            proposals = updater.get_skill_proposals()
+            assert len(proposals) >= 1
 
     def test_clear(self):
-        updater = KnowledgeUpdater()
-        entry = {"challenge_id": "c1", "category": "c", "status": "solved", "actions_taken": []}
-        updater.update_from_learning(entry)
-        updater.clear()
-        assert updater.get_update_history() == []
+        with _isolated_updater() as updater:
+            entry = {"challenge_id": "c1", "category": "c", "status": "solved", "actions_taken": []}
+            updater.update_from_learning(entry)
+            updater.clear()
+            assert updater.get_update_history() == []
 
 
 # ===================================================================
@@ -613,55 +665,54 @@ class TestCompetitionRunner:
 
 class TestImprovementReportGenerator:
     def test_generate_with_metrics(self):
-        generator = ImprovementReportGenerator()
+        with _isolated_report_generator() as generator:
+            prev_mc = MetricsCollector()
+            prev_mc.record(BenchmarkResult(challenge_id="c1", category="crypto", difficulty="m", status="solved"))
+            prev_mc.record(BenchmarkResult(challenge_id="c2", category="crypto", difficulty="m", status="failed"))
 
-        prev_mc = MetricsCollector()
-        prev_mc.record(BenchmarkResult(challenge_id="c1", category="crypto", difficulty="m", status="solved"))
-        prev_mc.record(BenchmarkResult(challenge_id="c2", category="crypto", difficulty="m", status="failed"))
+            curr_mc = MetricsCollector()
+            curr_mc.record(BenchmarkResult(challenge_id="c1", category="crypto", difficulty="m", status="solved"))
+            curr_mc.record(BenchmarkResult(challenge_id="c2", category="crypto", difficulty="m", status="solved"))
 
-        curr_mc = MetricsCollector()
-        curr_mc.record(BenchmarkResult(challenge_id="c1", category="crypto", difficulty="m", status="solved"))
-        curr_mc.record(BenchmarkResult(challenge_id="c2", category="crypto", difficulty="m", status="solved"))
-
-        report = generator.generate(previous_metrics=prev_mc, current_metrics=curr_mc)
-        assert report.previous_success_rate == 0.5
-        assert report.current_success_rate == 1.0
-        assert report.improvement_delta == 0.5
+            report = generator.generate(previous_metrics=prev_mc, current_metrics=curr_mc)
+            assert report.previous_success_rate == 0.5
+            assert report.current_success_rate == 1.0
+            assert report.improvement_delta == 0.5
 
     def test_generate_without_metrics(self):
-        generator = ImprovementReportGenerator()
-        report = generator.generate()
-        assert report.previous_success_rate == 0.0
+        with _isolated_report_generator() as generator:
+            report = generator.generate()
+            assert report.previous_success_rate == 0.0
 
     def test_improvements_list(self):
-        generator = ImprovementReportGenerator()
-        prev_mc = MetricsCollector()
-        curr_mc = MetricsCollector()
-        prev_mc.record(BenchmarkResult(challenge_id="c1", category="crypto", difficulty="m", status="failed"))
-        curr_mc.record(BenchmarkResult(challenge_id="c1", category="crypto", difficulty="m", status="solved"))
-        report = generator.generate(prev_mc, curr_mc)
-        assert len(report.improvements_made) >= 1
+        with _isolated_report_generator() as generator:
+            prev_mc = MetricsCollector()
+            curr_mc = MetricsCollector()
+            prev_mc.record(BenchmarkResult(challenge_id="c1", category="crypto", difficulty="m", status="failed"))
+            curr_mc.record(BenchmarkResult(challenge_id="c1", category="crypto", difficulty="m", status="solved"))
+            report = generator.generate(prev_mc, curr_mc)
+            assert len(report.improvements_made) >= 1
 
     def test_to_dict(self):
-        generator = ImprovementReportGenerator()
-        prev = MetricsCollector()
-        curr = MetricsCollector()
-        prev.record(BenchmarkResult(challenge_id="c1", category="c", difficulty="m", status="failed"))
-        curr.record(BenchmarkResult(challenge_id="c1", category="c", difficulty="m", status="solved"))
-        report = generator.generate(prev, curr)
-        d = report.to_dict()
-        assert d["improvement_delta"] == 1.0
+        with _isolated_report_generator() as generator:
+            prev = MetricsCollector()
+            curr = MetricsCollector()
+            prev.record(BenchmarkResult(challenge_id="c1", category="c", difficulty="m", status="failed"))
+            curr.record(BenchmarkResult(challenge_id="c1", category="c", difficulty="m", status="solved"))
+            report = generator.generate(prev, curr)
+            d = report.to_dict()
+            assert d["improvement_delta"] == 1.0
 
     def test_summary_table(self):
-        generator = ImprovementReportGenerator()
-        prev = MetricsCollector()
-        curr = MetricsCollector()
-        prev.record(BenchmarkResult(challenge_id="c1", category="c", difficulty="m", status="failed"))
-        curr.record(BenchmarkResult(challenge_id="c1", category="c", difficulty="m", status="solved"))
-        report = generator.generate(prev, curr)
-        table = report.summary_table()
-        assert "Autonomous Improvement Report" in table
-        assert "Improvement Delta" in table
+        with _isolated_report_generator() as generator:
+            prev = MetricsCollector()
+            curr = MetricsCollector()
+            prev.record(BenchmarkResult(challenge_id="c1", category="c", difficulty="m", status="failed"))
+            curr.record(BenchmarkResult(challenge_id="c1", category="c", difficulty="m", status="solved"))
+            report = generator.generate(prev, curr)
+            table = report.summary_table()
+            assert "Autonomous Improvement Report" in table
+            assert "Improvement Delta" in table
 
 
 # ===================================================================
