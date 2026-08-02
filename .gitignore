@@ -182,3 +182,7 @@ runtrials.sh
 # Local exploit helpers / generated hashes
 flaghasher
 flaghasher_b64.txt
+
+# Runtime learning data
+memory/**/*.json
+benchmark/history/*.json
