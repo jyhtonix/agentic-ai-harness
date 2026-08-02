@@ -18,6 +18,62 @@
         "confidence": 0.6,
         "recorded_at": "2026-08-02T14:39:40.861739+00:00"
       }
+    ],
+    "web": [
+      {
+        "strategy": "North-South: 1. Read nginx.conf \u2014 geoip2 routing sends IS (Iceland) IPs to the flag server (\"south\"). 2. Header spoofing (X-Forwarded",
+        "confidence": 0.5,
+        "recorded_at": "2026-08-02T14:49:52.611217+00:00"
+      },
+      {
+        "strategy": "Fool the Lockout: 1. Read app.py \u2014 the rate limit keys on request.remote_addr, blocks when num_requests > 10 within a 30s window. 2. The c",
+        "confidence": 0.5,
+        "recorded_at": "2026-08-02T14:49:52.615296+00:00"
+      }
+    ],
+    "pwn": [
+      {
+        "strategy": "offset-cycle: - The generated binary 1 was a 32-bit, non-PIE, no-canary ELF with a gets() overflow in vuln() (buf at ebp-0x26). - Expl",
+        "confidence": 0.5,
+        "recorded_at": "2026-08-02T14:49:52.617525+00:00"
+      },
+      {
+        "strategy": "tea-cash: - The program printed tcache head = chunks[0]. After freeing chunks5\u21920, the tcache LIFO list is chunks[0] \u2192 chunks[1] \u2192 ",
+        "confidence": 0.5,
+        "recorded_at": "2026-08-02T14:49:52.622813+00:00"
+      },
+      {
+        "strategy": "PIE TIME 2: - Exploited the printf(buffer) format string vulnerability to leak two PIE pointers: position 16 (base + 0x11c0 = _start",
+        "confidence": 0.5,
+        "recorded_at": "2026-08-02T14:49:52.625813+00:00"
+      },
+      {
+        "strategy": "x-sixty-what: - Found flag() at 0x401236 via ELF symbol parsing; vuln() had buf at rbp-0x40 (64 bytes), so return-address offset = 72.",
+        "confidence": 0.5,
+        "recorded_at": "2026-08-02T14:49:52.628812+00:00"
+      },
+      {
+        "strategy": "hijacking: - Found we could run .server.py as root via sudo (NOPASSWD). - The script does import socket, and since it runs from /ho",
+        "confidence": 0.5,
+        "recorded_at": "2026-08-02T14:49:52.631811+00:00"
+      },
+      {
+        "strategy": "Binary Gauntlet 3: - Identified two vulns: printf(buffer) format string and unbounded strcpy into a 112-byte stack buffer. - Leaked %23 \u2192",
+        "confidence": 0.5,
+        "recorded_at": "2026-08-02T14:49:52.635247+00:00"
+      },
+      {
+        "strategy": "Guessing Game 1: - rand() is never seeded, so the first guess is always rand()%100 + 1 = 84 \u2014 sent that to reach win(). - win() reads 360",
+        "confidence": 0.5,
+        "recorded_at": "2026-08-02T14:49:52.639913+00:00"
+      }
+    ],
+    "ai": [
+      {
+        "strategy": "Perceptron Train XOR: - Inspected the app's app.js and /config.json: 4 XOR points, initial model w=(1,-1), b=0, 16 updates max, 75% target. - ",
+        "confidence": 0.5,
+        "recorded_at": "2026-08-02T14:49:52.643835+00:00"
+      }
     ]
   },
   "failed": {
@@ -47,6 +103,14 @@
         "failure_reason": "Unknown",
         "recorded_at": "2026-08-02T14:39:47.801978+00:00",
         "failure_count": 4
+      }
+    ],
+    "web": [
+      {
+        "approach": "None significant \u2014 standard credential flow and route mapping worked.",
+        "failure_reason": "None significant \u2014 standard credential flow and route mapping worked.",
+        "recorded_at": "2026-08-02T14:49:52.594941+00:00",
+        "failure_count": 1
       }
     ]
   }

@@ -261,5 +261,530 @@
     "success": true,
     "recorded_at": "2026-08-02T14:39:40.647032+00:00",
     "flag_result": "PASS"
+  },
+  {
+    "challenge_id": "Old Sessions",
+    "category": "web",
+    "difficulty": "Easy",
+    "approach": "Old Sessions",
+    "tools_used": [
+      "curl",
+      "web inspection"
+    ],
+    "agents_used": [
+      "manual_import"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-02T15:21:02.068081+00:00",
+    "source_metadata": {
+      "source": "manual_record",
+      "imported_by": "Jason",
+      "captured_at": "2026-08-02T15:21:02.068081+00:00",
+      "filename": "manual_record.txt"
+    },
+    "description": "Old Sessions",
+    "skills_selected": [
+      "Session cookies are set with Expires=Tue, 09 Apr 2058 \u2014 they never expire (_permanent: True)",
+      "/sessions endpoint leaks all server-side session IDs, including the admin's: fngLLWBtq8MhXd3glEe-18YCnx1nuHTAeRk10eCcDrA with key: admin"
+    ],
+    "actions_commands": [
+      "curl",
+      "web inspection"
+    ],
+    "successful_techniques": [
+      "Session cookies are set with Expires=Tue, 09 Apr 2058 \u2014 they never expire (_permanent: True)",
+      "/sessions endpoint leaks all server-side session IDs, including the admin's: fngLLWBtq8MhXd3glEe-18YCnx1nuHTAeRk10eCcDrA with key: admin"
+    ],
+    "failed_approaches": [
+      "None significant \u2014 standard credential flow and route mapping worked."
+    ],
+    "flag_result": "picoCTF{s3t_s3ss10n_3xp1rat10n5_51c526ab}",
+    "confidence": 0.9
+  },
+  {
+    "challenge_id": "Crack the Gate 1",
+    "category": "web",
+    "difficulty": "Easy",
+    "approach": "Crack the Gate 1",
+    "tools_used": [
+      "curl",
+      "ROT13 decoding"
+    ],
+    "agents_used": [
+      "manual_import"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-02T15:21:02.082834+00:00",
+    "source_metadata": {
+      "source": "manual_record",
+      "imported_by": "Jason",
+      "captured_at": "2026-08-02T15:21:02.082834+00:00",
+      "filename": "manual_record.txt"
+    },
+    "description": "Crack the Gate 1",
+    "skills_selected": [
+      "HTML comment <!-- ABGR: Wnpx",
+      "grzcbenel olcnff: hfr urnqre \"K-Qri-Npprff: lrf\" -->",
+      "ROT13 decodes to: NOTE: Jack",
+      "temporary bypass: use header \"X-Dev-Access: yes\"",
+      "Adding X-Dev-Access: yes header to the /login POST with ctf-player@picoctf.org bypassed authentication"
+    ],
+    "actions_commands": [
+      "curl",
+      "ROT13 decoding"
+    ],
+    "successful_techniques": [
+      "HTML comment <!-- ABGR: Wnpx",
+      "grzcbenel olcnff: hfr urnqre \"K-Qri-Npprff: lrf\" -->",
+      "ROT13 decodes to: NOTE: Jack",
+      "temporary bypass: use header \"X-Dev-Access: yes\"",
+      "Adding X-Dev-Access: yes header to the /login POST with ctf-player@picoctf.org bypassed authentication"
+    ],
+    "flag_result": "picoCTF{brut4_f0rc4_7e5db33b}",
+    "confidence": 0.9
+  },
+  {
+    "challenge_id": "I made a cool website where you can announce whatever you wa",
+    "category": "web",
+    "difficulty": "Easy",
+    "approach": "I made a cool website where you can announce whatever you wa",
+    "tools_used": [
+      "curl"
+    ],
+    "agents_used": [
+      "manual_import"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-02T15:21:02.085754+00:00",
+    "source_metadata": {
+      "source": "manual_record",
+      "imported_by": "Jason",
+      "captured_at": "2026-08-02T15:21:02.085754+00:00",
+      "filename": "manual_record.txt"
+    },
+    "description": "I made a cool website where you can announce whatever you wa",
+    "skills_selected": [
+      "Flask app uses render_template_string on The content form field (confirmed in app.py)",
+      "{{7*7}} returned 49, confirming SSTI",
+      "{{url_for.__globals__.os.popen(...).read()}} gave RCE; ls -la showed a flag file in the working directory"
+    ],
+    "actions_commands": [
+      "curl"
+    ],
+    "successful_techniques": [
+      "Flask app uses render_template_string on The content form field (confirmed in app.py)",
+      "{{7*7}} returned 49, confirming SSTI",
+      "{{url_for.__globals__.os.popen(...).read()}} gave RCE; ls -la showed a flag file in the working directory"
+    ],
+    "flag_result": "picoCTF{s4rv3r_s1d3_t3mp14t3_1nj3ct10n5_4r3_c001_09365533}",
+    "confidence": 0.9
+  },
+  {
+    "challenge_id": "Sql Map1",
+    "category": "web",
+    "difficulty": "Medium",
+    "approach": "Sql Map1",
+    "tools_used": [
+      "curl",
+      "SQL injection (UNION-based)",
+      "hash cracking"
+    ],
+    "agents_used": [
+      "manual_import"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-02T15:21:02.087805+00:00",
+    "source_metadata": {
+      "source": "manual_record",
+      "imported_by": "Jason",
+      "captured_at": "2026-08-02T15:21:02.087805+00:00",
+      "filename": "manual_record.txt"
+    },
+    "description": "Sql Map1",
+    "skills_selected": [
+      "vuln.php?q= was SQL-injectable (SQLite); UNION injection dumped sqlite_master and tables flags, users",
+      "Dumped users table: MD5 password hashes for admin, ctf-player, ghost, malicious, noaccess, suspicious",
+      "Cracked ctf-player's md5 hash 7a67ab5872843b22b5e14511867c4e43 \u2192 dyesebel (via rockyou wordlist)",
+      "logging in as ctf-player redirected to secret.php (not vuln.php), which revealed The flag"
+    ],
+    "actions_commands": [
+      "curl",
+      "SQL injection (UNION-based)",
+      "hash cracking"
+    ],
+    "successful_techniques": [
+      "vuln.php?q= was SQL-injectable (SQLite); UNION injection dumped sqlite_master and tables flags, users",
+      "Dumped users table: MD5 password hashes for admin, ctf-player, ghost, malicious, noaccess, suspicious",
+      "Cracked ctf-player's md5 hash 7a67ab5872843b22b5e14511867c4e43 \u2192 dyesebel (via rockyou wordlist)",
+      "logging in as ctf-player redirected to secret.php (not vuln.php), which revealed The flag"
+    ],
+    "flag_result": "picoCTF{F0uNd_s3cr3T_K3y_f0R_w3_<>}",
+    "confidence": 0.9
+  },
+  {
+    "challenge_id": "Input Injection 1",
+    "category": "pwn",
+    "difficulty": "Easy",
+    "approach": "Input Injection 1",
+    "tools_used": [
+      "nc"
+    ],
+    "agents_used": [
+      "manual_import"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-02T15:21:02.090319+00:00",
+    "source_metadata": {
+      "source": "manual_record",
+      "imported_by": "Jason",
+      "captured_at": "2026-08-02T15:21:02.090319+00:00",
+      "filename": "manual_record.txt"
+    },
+    "description": "Input Injection 1",
+    "actions_commands": [
+      "nc"
+    ],
+    "flag_result": "picoCTF{0v3rfl0w_c0mm4nd_a9259e7a}",
+    "confidence": 0.9
+  },
+  {
+    "challenge_id": "sice_cream",
+    "category": "pwn",
+    "difficulty": "unknown",
+    "approach": "sice_cream",
+    "tools_used": [
+      "file",
+      "nc"
+    ],
+    "agents_used": [
+      "manual_import"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-02T15:21:02.094718+00:00",
+    "source_metadata": {
+      "source": "manual_record",
+      "imported_by": "Jason",
+      "captured_at": "2026-08-02T15:21:02.094718+00:00",
+      "filename": "manual_record.txt"
+    },
+    "description": "sice_cream",
+    "actions_commands": [
+      "file",
+      "nc"
+    ],
+    "flag_result": "flag{th3_r3al_questi0n_is_why_1s_libc_2.23_still_4_th1ng_B6abE8b4}",
+    "confidence": 0.5
+  },
+  {
+    "challenge_id": "North-South",
+    "category": "web",
+    "difficulty": "unknown",
+    "approach": "1. Read nginx.conf \u2014 geoip2 routing sends IS (Iceland) IPs to the flag server (\"south\"). 2. Header spoofing (X-Forwarded-For, etc.) failed since geoip uses the real TCP source IP. 3. Ran local Tor with ExitNodes pinned to Iceland exit nodes that allow all ports (iceberg, limitededition, ageinghacker) + StrictNodes 1, then routed the request via --socks5-hostname 127.0.0.1:9050 to make the request appear from Iceland.",
+    "tools_used": [
+      "tor",
+      "requests"
+    ],
+    "agents_used": [
+      "manual_import"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-02T15:21:02.094718+00:00",
+    "source_metadata": {
+      "source": "manual_record",
+      "imported_by": "Jason",
+      "captured_at": "2026-08-02T15:21:02.094718+00:00",
+      "filename": "manual_record.txt"
+    },
+    "description": "North-South",
+    "actions_commands": [
+      "tor",
+      "requests"
+    ],
+    "final_solution_reasoning": "1. Read nginx.conf \u2014 geoip2 routing sends IS (Iceland) IPs to the flag server (\"south\"). 2. Header spoofing (X-Forwarded-For, etc.) failed since geoip uses the real TCP source IP. 3. Ran local Tor with ExitNodes pinned to Iceland exit nodes that allow all ports (iceberg, limitededition, ageinghacker) + StrictNodes 1, then routed the request via --socks5-hostname 127.0.0.1:9050 to make the request appear from Iceland.",
+    "flag_result": "picoCTF{g30_b453d_r0u71n9_ac6ed215}",
+    "confidence": 0.5
+  },
+  {
+    "challenge_id": "Fool the Lockout",
+    "category": "web",
+    "difficulty": "unknown",
+    "approach": "1. Read app.py \u2014 the rate limit keys on request.remote_addr, blocks when num_requests > 10 within a 30s window. 2. The counter resets after 30s (EPOCH_DURATION), so the lockout is defeatable by pacing: \u226410 attempts per 30s window. 3. Brute-forced all 100 username;password pairs from creds-dump.txt with Python requests, sleeping 32s every 9 attempts to stay under the limit. Credential emely:tyrant succeeded.",
+    "tools_used": [
+      "python",
+      "requests"
+    ],
+    "agents_used": [
+      "manual_import"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-02T15:21:02.127880+00:00",
+    "source_metadata": {
+      "source": "manual_record",
+      "imported_by": "Jason",
+      "captured_at": "2026-08-02T15:21:02.127880+00:00",
+      "filename": "manual_record.txt"
+    },
+    "description": "Fool the Lockout",
+    "actions_commands": [
+      "python",
+      "requests"
+    ],
+    "final_solution_reasoning": "1. Read app.py \u2014 the rate limit keys on request.remote_addr, blocks when num_requests > 10 within a 30s window. 2. The counter resets after 30s (EPOCH_DURATION), so the lockout is defeatable by pacing: \u226410 attempts per 30s window. 3. Brute-forced all 100 username;password pairs from creds-dump.txt with Python requests, sleeping 32s every 9 attempts to stay under the limit. Credential emely:tyrant succeeded.",
+    "flag_result": "picoCTF{f00l_7h4t_l1m1t3r_b56b614c}",
+    "confidence": 0.5
+  },
+  {
+    "challenge_id": "offset-cycle",
+    "category": "pwn",
+    "difficulty": "unknown",
+    "approach": "- The generated binary 1 was a 32-bit, non-PIE, no-canary ELF with a gets() overflow in vuln() (buf at ebp-0x26). - Exploit used pwntools to dynamically find the offset via the get_return_address() leak: sent a cyclic pattern, parsed the leaked 0x%x return address, and ran cyclic_find(p32(leak)) to get the offset (42). - Then overwrote the return address with win() at 0x080491f6, which read and printed CodeBank/flag.txt.",
+    "tools_used": [
+      "pwntools",
+      "gdb",
+      "cyclic"
+    ],
+    "agents_used": [
+      "manual_import"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-02T15:21:02.150287+00:00",
+    "source_metadata": {
+      "source": "manual_record",
+      "imported_by": "Jason",
+      "captured_at": "2026-08-02T15:21:02.150287+00:00",
+      "filename": "manual_record.txt"
+    },
+    "description": "offset-cycle",
+    "actions_commands": [
+      "pwntools",
+      "gdb",
+      "cyclic"
+    ],
+    "final_solution_reasoning": "- The generated binary 1 was a 32-bit, non-PIE, no-canary ELF with a gets() overflow in vuln() (buf at ebp-0x26). - Exploit used pwntools to dynamically find the offset via the get_return_address() leak: sent a cyclic pattern, parsed the leaked 0x%x return address, and ran cyclic_find(p32(leak)) to get the offset (42). - Then overwrote the return address with win() at 0x080491f6, which read and printed CodeBank/flag.txt.",
+    "flag_result": "picoCTF{u_Us3d_pwNt00L5_f1d96c5f}",
+    "confidence": 0.5
+  },
+  {
+    "challenge_id": "tea-cash",
+    "category": "pwn",
+    "difficulty": "unknown",
+    "approach": "- The program printed tcache head = chunks[0]. After freeing chunks5\u21920, the tcache LIFO list is chunks[0] \u2192 chunks[1] \u2192 ... \u2192 chunks[5] \u2192 NULL. - Since the 6 chunks are allocated contiguously, each is 0x90 bytes apart (0x80 data + 0x10 header). - I submitted the addresses in traversal order: head + i*0x90 for i = 0..5, which matched the stored next pointers in each freed chunk, passing the validation and triggering the flag print.",
+    "tools_used": [
+      "gdb",
+      "nc"
+    ],
+    "agents_used": [
+      "manual_import"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-02T15:21:02.164890+00:00",
+    "source_metadata": {
+      "source": "manual_record",
+      "imported_by": "Jason",
+      "captured_at": "2026-08-02T15:21:02.164890+00:00",
+      "filename": "manual_record.txt"
+    },
+    "description": "tea-cash",
+    "actions_commands": [
+      "gdb",
+      "nc"
+    ],
+    "final_solution_reasoning": "- The program printed tcache head = chunks[0]. After freeing chunks5\u21920, the tcache LIFO list is chunks[0] \u2192 chunks[1] \u2192 ... \u2192 chunks[5] \u2192 NULL. - Since the 6 chunks are allocated contiguously, each is 0x90 bytes apart (0x80 data + 0x10 header). - I submitted the addresses in traversal order: head + i*0x90 for i = 0..5, which matched the stored next pointers in each freed chunk, passing the validation and triggering the flag print.",
+    "flag_result": "picoCTF{642fda7eaff355293107bd2c6f7ceec7}",
+    "confidence": 0.5
+  },
+  {
+    "challenge_id": "PIE TIME 2",
+    "category": "pwn",
+    "difficulty": "unknown",
+    "approach": "- Exploited the printf(buffer) format string vulnerability to leak two PIE pointers: position 16 (base + 0x11c0 = _start) and position 19 (base + 0x1441, a return address into main). - Cross-checked both to confirm the PIE base, computed win = base + 0x136a (offset found via ELF symbol parsing). - sent The address to The scanf(\"%lx\") prompt and jumped to win(), which printed The flag.",
+    "tools_used": [
+      "nc",
+      "netcat"
+    ],
+    "agents_used": [
+      "manual_import"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-02T15:21:02.178399+00:00",
+    "source_metadata": {
+      "source": "manual_record",
+      "imported_by": "Jason",
+      "captured_at": "2026-08-02T15:21:02.178399+00:00",
+      "filename": "manual_record.txt"
+    },
+    "description": "PIE TIME 2",
+    "actions_commands": [
+      "nc",
+      "netcat"
+    ],
+    "final_solution_reasoning": "- Exploited the printf(buffer) format string vulnerability to leak two PIE pointers: position 16 (base + 0x11c0 = _start) and position 19 (base + 0x1441, a return address into main). - Cross-checked both to confirm the PIE base, computed win = base + 0x136a (offset found via ELF symbol parsing). - sent The address to The scanf(\"%lx\") prompt and jumped to win(), which printed The flag.",
+    "flag_result": "picoCTF{p13_5h0u1dn'7_134k_1e55cd55}",
+    "confidence": 0.5
+  },
+  {
+    "challenge_id": "x-sixty-what",
+    "category": "pwn",
+    "difficulty": "unknown",
+    "approach": "- Found flag() at 0x401236 via ELF symbol parsing; vuln() had buf at rbp-0x40 (64 bytes), so return-address offset = 72. - Jumped to 0x40123b (flag+5, the instruction after push rbp): landing at the full prologue would leave rsp % 16 == 8 for fopen/fgets/printf (movaps segfault), but skipping the push keeps 16-byte alignment. - Payload: 72 As + p64(0x40123b).",
+    "tools_used": [
+      "nc"
+    ],
+    "agents_used": [
+      "manual_import"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-02T15:21:02.196481+00:00",
+    "source_metadata": {
+      "source": "manual_record",
+      "imported_by": "Jason",
+      "captured_at": "2026-08-02T15:21:02.196481+00:00",
+      "filename": "manual_record.txt"
+    },
+    "description": "x-sixty-what",
+    "actions_commands": [
+      "nc"
+    ],
+    "final_solution_reasoning": "- Found flag() at 0x401236 via ELF symbol parsing; vuln() had buf at rbp-0x40 (64 bytes), so return-address offset = 72. - Jumped to 0x40123b (flag+5, the instruction after push rbp): landing at the full prologue would leave rsp % 16 == 8 for fopen/fgets/printf (movaps segfault), but skipping the push keeps 16-byte alignment. - Payload: 72 As + p64(0x40123b).",
+    "flag_result": "picoCTF{b1663r_15_b3773r_d95e02b6}",
+    "confidence": 0.5
+  },
+  {
+    "challenge_id": "hijacking",
+    "category": "pwn",
+    "difficulty": "unknown",
+    "approach": "- Found we could run .server.py as root via sudo (NOPASSWD). - The script does import socket, and since it runs from /home/picoctf/ (which we own), sys.path[0] points there. - Placed a malicious socket.py in /home/picoctf/ \u2014 Python imported it as root during .server.py execution, letting us read /root/.flag.txt.",
+    "tools_used": [
+      "python",
+      "file"
+    ],
+    "agents_used": [
+      "manual_import"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-02T15:21:02.212093+00:00",
+    "source_metadata": {
+      "source": "manual_record",
+      "imported_by": "Jason",
+      "captured_at": "2026-08-02T15:21:02.212093+00:00",
+      "filename": "manual_record.txt"
+    },
+    "description": "hijacking",
+    "actions_commands": [
+      "python",
+      "file"
+    ],
+    "final_solution_reasoning": "- Found we could run .server.py as root via sudo (NOPASSWD). - The script does import socket, and since it runs from /home/picoctf/ (which we own), sys.path[0] points there. - Placed a malicious socket.py in /home/picoctf/ \u2014 Python imported it as root during .server.py execution, letting us read /root/.flag.txt.",
+    "flag_result": "picoCTF{pYth0nn_libraryH!j@CK!n9_4c188d27}",
+    "confidence": 0.5
+  },
+  {
+    "challenge_id": "Binary Gauntlet 3",
+    "category": "pwn",
+    "difficulty": "unknown",
+    "approach": "- Identified two vulns: printf(buffer) format string and unbounded strcpy into a 112-byte stack buffer. - Leaked %23$p \u2192 __libc_start_main + 0xe7, computed libc_base = leak - 0x21ba0 - 0xe7. - Since strcpy stops at NUL bytes, a full ROP chain is impossible \u2014 instead jumped to the one_gadget at libc+0x4f302 (execve(\"/bin/sh\", rsp+0x40, environ)), found by disassembling the provided libc-2.27.so for a lea rdi, [/bin/sh] \u2192 call execve sequence. - Payload: 120 As + p64(libc_base + 0x4f302) (the address's inherent trailing NULs terminate strcpy as a valid partial overwrite), then popped a shell and read /app/flag.txt.",
+    "tools_used": [
+      "nc",
+      "one_gadget"
+    ],
+    "agents_used": [
+      "manual_import"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-02T15:21:02.228103+00:00",
+    "source_metadata": {
+      "source": "manual_record",
+      "imported_by": "Jason",
+      "captured_at": "2026-08-02T15:21:02.228103+00:00",
+      "filename": "manual_record.txt"
+    },
+    "description": "Binary Gauntlet 3",
+    "actions_commands": [
+      "nc",
+      "one_gadget"
+    ],
+    "final_solution_reasoning": "- Identified two vulns: printf(buffer) format string and unbounded strcpy into a 112-byte stack buffer. - Leaked %23$p \u2192 __libc_start_main + 0xe7, computed libc_base = leak - 0x21ba0 - 0xe7. - Since strcpy stops at NUL bytes, a full ROP chain is impossible \u2014 instead jumped to the one_gadget at libc+0x4f302 (execve(\"/bin/sh\", rsp+0x40, environ)), found by disassembling the provided libc-2.27.so for a lea rdi, [/bin/sh] \u2192 call execve sequence. - Payload: 120 As + p64(libc_base + 0x4f302) (the address's inherent trailing NULs terminate strcpy as a valid partial overwrite), then popped a shell and read /app/flag.txt.",
+    "confidence": 0.5
+  },
+  {
+    "challenge_id": "Guessing Game 1",
+    "category": "pwn",
+    "difficulty": "unknown",
+    "approach": "- rand() is never seeded, so the first guess is always rand()%100 + 1 = 84 \u2014 sent that to reach win(). - win() reads 360 bytes via fgets into a 100-byte buffer (offset to return address = 120). - Static binary, NX enabled, no /bin/sh/system \u2014 built a ROP chain that: 1. Wrote \"/bin/sh\" into .data via pop rsi + pop rax + mov qword ptr [rsi], rax; ret 2. Set rax=59, rdi=.data, rsi=0, rdx=0 and hit a syscall gadget \u2192 execve(\"/bin/sh\") - Popped a shell and read flag.txt.",
+    "tools_used": [
+      "nc"
+    ],
+    "agents_used": [
+      "manual_import"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-02T15:21:02.243394+00:00",
+    "source_metadata": {
+      "source": "manual_record",
+      "imported_by": "Jason",
+      "captured_at": "2026-08-02T15:21:02.243394+00:00",
+      "filename": "manual_record.txt"
+    },
+    "description": "Guessing Game 1",
+    "actions_commands": [
+      "nc"
+    ],
+    "final_solution_reasoning": "- rand() is never seeded, so the first guess is always rand()%100 + 1 = 84 \u2014 sent that to reach win(). - win() reads 360 bytes via fgets into a 100-byte buffer (offset to return address = 120). - Static binary, NX enabled, no /bin/sh/system \u2014 built a ROP chain that: 1. Wrote \"/bin/sh\" into .data via pop rsi + pop rax + mov qword ptr [rsi], rax; ret 2. Set rax=59, rdi=.data, rsi=0, rdx=0 and hit a syscall gadget \u2192 execve(\"/bin/sh\") - Popped a shell and read flag.txt.",
+    "flag_result": "picoCTF{r0p_y0u_l1k3_4_hurr1c4n3_476d756f24c7952d}",
+    "confidence": 0.5
+  },
+  {
+    "challenge_id": "Perceptron Train XOR",
+    "category": "ai",
+    "difficulty": "unknown",
+    "approach": "- Inspected the app's app.js and /config.json: 4 XOR points, initial model w=(1,-1), b=0, 16 updates max, 75% target. - Called POST /train with a learning rate; the server runs the classic update rule (only misclassified points update, no weight decay). With lr=1.0, only 2 updates were needed \u2014 the boundary shifted to x - y - 2 = 0, correctly classifying 3/4 points (75%). - The response included \"flag\" when success was true.",
+    "tools_used": [],
+    "agents_used": [
+      "manual_import"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-02T15:21:02.257382+00:00",
+    "source_metadata": {
+      "source": "manual_record",
+      "imported_by": "Jason",
+      "captured_at": "2026-08-02T15:21:02.257382+00:00",
+      "filename": "manual_record.txt"
+    },
+    "description": "Perceptron Train XOR",
+    "final_solution_reasoning": "- Inspected the app's app.js and /config.json: 4 XOR points, initial model w=(1,-1), b=0, 16 updates max, 75% target. - Called POST /train with a learning rate; the server runs the classic update rule (only misclassified points update, no weight decay). With lr=1.0, only 2 updates were needed \u2014 the boundary shifted to x - y - 2 = 0, correctly classifying 3/4 points (75%). - The response included \"flag\" when success was true.",
+    "flag_result": "academy{x0r_unl34rn4bl3_by_p3rc3ptr0ns_89cd5062}",
+    "confidence": 0.5
+  },
+  {
+    "challenge_id": "Pico Bank",
+    "category": "reverse_engineering",
+    "difficulty": "unknown",
+    "approach": "Pico Bank",
+    "tools_used": [
+      "curl",
+      "apktool",
+      "jadxgui",
+      "requests"
+    ],
+    "agents_used": [
+      "manual_import"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-02T15:21:02.272461+00:00",
+    "source_metadata": {
+      "source": "manual_record",
+      "imported_by": "Jason",
+      "captured_at": "2026-08-02T15:21:02.272461+00:00",
+      "filename": "manual_record.txt"
+    },
+    "description": "Pico Bank",
+    "actions_commands": [
+      "curl",
+      "apktool",
+      "jadxgui",
+      "requests"
+    ],
+    "flag_result": "picoCTF{1_l13d_4b0ut_b31ng_s3cur3d_m0b1l3_l0g1n_e1e409ae}",
+    "confidence": 0.5
   }
 ]
