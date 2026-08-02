@@ -45,12 +45,14 @@ Return a JSON plan with:
 
 
 class SkillPlanner:
-    def __init__(self, llm: LLM, registry: AgentRegistry, skill_selector=None):
+    def __init__(self, llm: LLM, registry: AgentRegistry, skill_selector=None,
+                 memory_service=None):
         self.llm = llm
         self.registry = registry
         self.skill_selector = skill_selector
+        self.memory_service = memory_service
 
-    async def create_plan(self, request: str) -> TaskPlan:
+    async def create_plan(self, request: str, category: str = "") -> TaskPlan:
         agents_desc = json.dumps(self.registry.list_agents(), indent=2)
         skills_desc = ""
         if self.skill_selector:
@@ -65,7 +67,18 @@ class SkillPlanner:
                     for cat, count in sorted(categories.items())
                 )
 
+        memory_context = ""
+        if self.memory_service:
+            try:
+                memory_context = self.memory_service.format_context(
+                    category, query=request, limit=3
+                )
+            except Exception:
+                logger.exception("Memory retrieval failed during planning")
+
         prompt = DISPATCH_SYSTEM_PROMPT.format(agents=agents_desc) + skills_desc
+        if memory_context:
+            prompt += "\n\n" + memory_context
 
         messages = [
             {"role": "system", "content": prompt},

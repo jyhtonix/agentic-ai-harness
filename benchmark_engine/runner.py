@@ -27,12 +27,14 @@ class BenchmarkRunner:
         retry_controller: Optional[RetryController] = None,
         failure_analyzer: Optional[FailureAnalyzer] = None,
         history: Optional[BenchmarkHistory] = None,
+        learning_service=None,
     ):
         self.challenge_loader = challenge_loader or ChallengeLoader()
         self.supervisor_factory = supervisor_factory
         self.retry_controller = retry_controller or RetryController()
         self.failure_analyzer = failure_analyzer or FailureAnalyzer()
         self.history = history or BenchmarkHistory()
+        self.learning_service = learning_service
         self.metrics = MetricsCollector()
 
     async def run_challenge(self, challenge_id: str, max_attempts: Optional[int] = None) -> BenchmarkResult:
@@ -59,6 +61,7 @@ class BenchmarkRunner:
         effective_max = max_attempts if max_attempts is not None else self.retry_controller.max_attempts
 
         last_result: Optional[BenchmarkResult] = None
+        supervisor_result: Optional[dict] = None
         for attempt in range(1, effective_max + 1):
             logger.info("Benchmark attempt %d/%d for %s", attempt, effective_max, challenge_id)
 
@@ -96,9 +99,22 @@ class BenchmarkRunner:
         if last_result:
             self.metrics.record(last_result)
             self.history.save(last_result)
+            await self._record_learning(last_result, supervisor_result)
         return last_result or BenchmarkResult(
             challenge_id=challenge_id, category="unknown", difficulty="unknown", status="error"
         )
+
+    async def _record_learning(self, result: BenchmarkResult, supervisor_result: Optional[dict]) -> None:
+        """Feed the challenge result into the memory/learning loop."""
+        if not self.learning_service:
+            return
+        try:
+            if supervisor_result and isinstance(supervisor_result, dict):
+                self.learning_service.record_supervisor_output(supervisor_result)
+            else:
+                self.learning_service.record_result(result)
+        except Exception as e:
+            logger.warning("Learning capture failed for %s: %s", result.challenge_id, e)
 
     async def run_dataset(self, challenge_ids: list[str], max_attempts: Optional[int] = None) -> list[BenchmarkResult]:
         results: list[BenchmarkResult] = []

@@ -34,17 +34,19 @@ class AutonomousLearner:
         self.solution_memory = solution_memory or SolutionMemory()
         self._learning_log: list[dict] = []
 
-    def learn_from_result(self, result: BenchmarkResult) -> dict:
+    def learn_from_result(self, result: BenchmarkResult, episode: Optional[dict] = None) -> dict:
         entry = {
             "challenge_id": result.challenge_id,
             "status": result.status,
             "category": result.category,
         }
+        if episode:
+            entry["episode"] = episode
 
         if result.solved:
-            return self._process_success(result, entry)
+            return self._process_success(result, entry, episode=episode)
 
-        return self._process_failure(result, entry)
+        return self._process_failure(result, entry, episode=episode)
 
     def learn_from_results(self, results: list[BenchmarkResult]) -> list[dict]:
         return [self.learn_from_result(r) for r in results]
@@ -60,7 +62,7 @@ class AutonomousLearner:
             "memory_update_count": len(self._learning_log),
         }
 
-    def _process_success(self, result: BenchmarkResult, entry: dict) -> dict:
+    def _process_success(self, result: BenchmarkResult, entry: dict, episode: Optional[dict] = None) -> dict:
         self.solution_memory.record(
             challenge_id=result.challenge_id,
             category=result.category,
@@ -69,6 +71,16 @@ class AutonomousLearner:
             tools_used=result.tools_used,
             agents_used=result.agents_used,
             success=True,
+            description=(episode or {}).get("description", ""),
+            initial_plan=(episode or {}).get("initial_plan"),
+            skills_selected=(episode or {}).get("skills_selected"),
+            actions_commands=(episode or {}).get("actions_commands"),
+            successful_techniques=(episode or {}).get("successful_techniques"),
+            failed_approaches=(episode or {}).get("failed_approaches"),
+            final_solution_reasoning=(episode or {}).get("final_solution_reasoning", ""),
+            verification_result=(episode or {}).get("verification_result"),
+            flag_result=result.flag_result,
+            confidence=result.confidence,
         )
         self.strategy_memory.record(
             result.category,
@@ -80,7 +92,7 @@ class AutonomousLearner:
         self._learning_log.append(entry)
         return entry
 
-    def _process_failure(self, result: BenchmarkResult, entry: dict) -> dict:
+    def _process_failure(self, result: BenchmarkResult, entry: dict, episode: Optional[dict] = None) -> dict:
         analysis = self.failure_analyzer.analyze(result)
         skill_gap = self.skill_gap_detector.analyze(result)
         evolved = self.strategy_evolution.evolve(result.category, [result])
@@ -91,6 +103,15 @@ class AutonomousLearner:
             reason=result.failure_reason or analysis.get("reason", ""),
             failure_type=analysis.get("category", "unknown"),
             recommendation=analysis.get("recommendation", ""),
+            description=(episode or {}).get("description", ""),
+            initial_plan=(episode or {}).get("initial_plan"),
+            skills_selected=(episode or {}).get("skills_selected"),
+            tools_used=result.tools_used,
+            actions_commands=(episode or {}).get("actions_commands"),
+            failed_approaches=(episode or {}).get("failed_approaches"),
+            final_solution_reasoning=(episode or {}).get("final_solution_reasoning", ""),
+            verification_result=(episode or {}).get("verification_result"),
+            flag_result=result.flag_result,
         )
 
         actions = ["recorded_failure"]

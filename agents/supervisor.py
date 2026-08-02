@@ -117,7 +117,8 @@ class SupervisorAgent:
                  report_generator=None,
                  challenge_loader=None,
                  flag_verifier=None,
-                 coordinator=None):
+                 coordinator=None,
+                 memory_service=None):
         self.llm = llm
         self.registry = registry
         self.skill_selector = skill_selector
@@ -128,6 +129,7 @@ class SupervisorAgent:
         self.challenge_loader = challenge_loader
         self.flag_verifier = flag_verifier
         self.coordinator = coordinator
+        self.memory_service = memory_service
         self.conversation_history: list[AgentMessage] = []
 
     async def run(self, request: str, challenge_id: str = "") -> dict:
@@ -148,9 +150,8 @@ class SupervisorAgent:
                 request = f"[Challenge: {challenge_def.name}]\n{challenge_def.description}\n\n{request}"
 
         # Phase 1: Analyse and plan
-        plan = await self._create_dispatch_plan(request)
+        plan = await self._create_dispatch_plan(request, category=challenge_def.category if challenge_def else "")
         logger.info("Dispatch plan: %d steps", len(plan.get("steps", [])))
-
         # Phase 2: Team coordination (if coordinator is available)
         team_coordination = None
         if self.coordinator:
@@ -281,14 +282,14 @@ class SupervisorAgent:
             "final_response": final,
         }
 
-    async def _create_dispatch_plan(self, request: str) -> dict:
+    async def _create_dispatch_plan(self, request: str, category: str = "") -> dict:
         """
         Phase 1: Analyse the request and determine which agents to dispatch.
         Delegates to SkillPlanner if available, otherwise uses the built-in
         LLM-based planning for backward compatibility.
         """
         if self.planner:
-            plan = await self.planner.create_plan(request)
+            plan = await self.planner.create_plan(request, category=category)
             return plan.to_dict()
 
         agents_desc = json.dumps(self.registry.list_agents(), indent=2)

@@ -55,6 +55,7 @@ from skills_engine.selector import SkillSelector
 from skills_engine.injector import SkillInjector
 from skills_engine.planner import SkillPlanner
 from skills_engine.execution import ExecutionAgent
+from memory.service import MemoryService
 
 from core.security import (
     security_scheme,
@@ -178,6 +179,8 @@ app.max_request_size = 1024 * 1024  # 1 MB
 
 llm = OpenAILLM()
 
+memory_service = MemoryService()
+
 skill_registry = SkillRegistry()
 skill_injector = SkillInjector(budget=settings.skill_injection_budget)
 skill_selector = SkillSelector(skill_registry)
@@ -192,11 +195,11 @@ registry.register(ThreatHunterAgent(llm))
 registry.register(MalwareAnalystAgent(llm))
 registry.register(IncidentResponderAgent(llm))
 
-skill_planner = SkillPlanner(llm=llm, registry=registry, skill_selector=skill_selector)
+skill_planner = SkillPlanner(llm=llm, registry=registry, skill_selector=skill_selector, memory_service=memory_service)
 execution_agent = ExecutionAgent(registry=registry, skill_selector=skill_selector, skill_injector=skill_injector)
 verifier = VerificationAgent()
 report_generator = LearningReportGenerator()
-supervisor = SupervisorAgent(llm, registry, skill_selector=skill_selector, planner=skill_planner, execution_agent=execution_agent, verifier=verifier, report_generator=report_generator)
+supervisor = SupervisorAgent(llm, registry, skill_selector=skill_selector, planner=skill_planner, execution_agent=execution_agent, verifier=verifier, report_generator=report_generator, memory_service=memory_service)
 
 
 # ---------------------------------------------------------------------------

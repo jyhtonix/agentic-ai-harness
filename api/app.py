@@ -17,6 +17,7 @@ def create_app(
     supervisor_factory=None,
     auth_provider: Optional[AuthProvider] = None,
     session_manager: Optional[SessionManager] = None,
+    memory_service=None,
 ) -> FastAPI:
     if auth_provider is None:
         auth_provider = AuthProvider(mode="anonymous")
@@ -40,6 +41,7 @@ def create_app(
     app.state.session_manager = session_manager
     app.state.challenge_loader = challenge_loader
     app.state.supervisor_factory = supervisor_factory
+    app.state.memory_service = memory_service
 
     _register_routes(app)
 

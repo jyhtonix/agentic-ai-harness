@@ -84,6 +84,7 @@ async def run_challenge(
                 session_mgr.set_learning_report(session.session_id, lr)
             session_mgr.update_status(session.session_id, "COMPLETED")
             logger.info("Session %s completed successfully", session.session_id)
+            _capture_learning(request, result)
         except Exception as e:
             logger.error("Session %s failed: %s", session.session_id, e)
             session_mgr.set_error(session.session_id, str(e))
@@ -91,3 +92,14 @@ async def run_challenge(
     asyncio.create_task(_run())
 
     return ChallengeRunResponse(session_id=session.session_id, status="running")
+
+
+def _capture_learning(request: Request, supervisor_result: dict) -> None:
+    """Feed a completed challenge run into the CTF learning loop."""
+    memory_service = request.app.state.memory_service
+    if not memory_service:
+        return
+    try:
+        memory_service.record_supervisor_output(supervisor_result)
+    except Exception as e:
+        logger.warning("Learning capture failed: %s", e)
