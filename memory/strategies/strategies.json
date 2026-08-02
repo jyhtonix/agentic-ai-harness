@@ -4,19 +4,19 @@
       {
         "strategy": "crypto:python:crypto_agent",
         "confidence": 0.9,
-        "recorded_at": "2026-08-01T03:36:26.344043+00:00"
+        "recorded_at": "2026-08-02T14:39:40.328927+00:00"
       },
       {
         "strategy": "Solved with: crypto_agent",
         "confidence": 0.9,
-        "recorded_at": "2026-08-01T03:36:26.389806+00:00"
+        "recorded_at": "2026-08-02T14:39:40.533930+00:00"
       }
     ],
     "malware": [
       {
         "strategy": "Use PE analysis tools",
         "confidence": 0.6,
-        "recorded_at": "2026-08-01T03:36:26.561299+00:00"
+        "recorded_at": "2026-08-02T14:39:40.861739+00:00"
       }
     ]
   },
@@ -25,28 +25,28 @@
       {
         "approach": "malware::",
         "failure_reason": "missing PE analysis skill",
-        "recorded_at": "2026-08-01T03:36:26.449938+00:00",
-        "failure_count": 18
+        "recorded_at": "2026-08-02T14:39:40.651033+00:00",
+        "failure_count": 20
       },
       {
         "approach": "malware:python:coder/security_agent",
         "failure_reason": "Unknown",
-        "recorded_at": "2026-08-02T04:00:01.021921+00:00",
-        "failure_count": 2
+        "recorded_at": "2026-08-02T14:39:47.547269+00:00",
+        "failure_count": 4
       }
     ],
     "crypto": [
       {
         "approach": "crypto::",
         "failure_reason": "insufficient reasoning",
-        "recorded_at": "2026-08-01T03:36:26.530452+00:00",
-        "failure_count": 36
+        "recorded_at": "2026-08-02T14:39:40.788372+00:00",
+        "failure_count": 40
       },
       {
         "approach": "crypto:python:crypto_agent",
         "failure_reason": "Unknown",
-        "recorded_at": "2026-08-02T04:00:01.272955+00:00",
-        "failure_count": 2
+        "recorded_at": "2026-08-02T14:39:47.801978+00:00",
+        "failure_count": 4
       }
     ]
   }

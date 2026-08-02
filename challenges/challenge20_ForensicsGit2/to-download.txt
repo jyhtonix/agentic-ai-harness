@@ -1,0 +1,1 @@
+https://challenge-files.picoctf.net/c_plain_mesa/5815a97d35f9214aebb870586256eb241b51eddc4967fd7f3ca815a190012d54/disk.img.gz

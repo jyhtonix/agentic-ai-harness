@@ -2,13 +2,13 @@
   "rankings": {
     "crypto": [
       {
-        "strategy": "crypto:python:crypto_agent",
+        "strategy": "Solved with: crypto_agent",
         "score": 0.9,
         "status": "available"
       },
       {
-        "strategy": "Solved with: crypto_agent",
-        "score": 0.9,
+        "strategy": "crypto:python:crypto_agent",
+        "score": 0.27,
         "status": "available"
       }
     ],

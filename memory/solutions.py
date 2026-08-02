@@ -25,7 +25,8 @@ class SolutionMemory:
                final_solution_reasoning: str = "",
                verification_result: Optional[dict] = None,
                flag_result: Optional[str] = None,
-               confidence: float = 0.0) -> None:
+               confidence: float = 0.0,
+               source_metadata: Optional[dict] = None) -> None:
         entry = {
             "challenge_id": challenge_id,
             "category": category,
@@ -36,6 +37,8 @@ class SolutionMemory:
             "success": success,
             "recorded_at": datetime.now(timezone.utc).isoformat(),
         }
+        if source_metadata:
+            entry["source_metadata"] = source_metadata
         if description:
             entry["description"] = description
         if initial_plan:

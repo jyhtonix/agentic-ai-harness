@@ -1,0 +1,683 @@
+=================================================================================
+
+@prompts/ctf_security_agent.md
+@prompts/web_exploitation_expert.md
+
+You are a Web Exploitation CTF Security Agent.
+
+Your task is to analyze and solve the following CTF challenge.
+
+Web Exploitation - Old Sessions
+
+Proper session timeout controls are critical for securing user accounts. If a user logs in on a public or shared computer but doesn’t explicitly log out (instead simply closing the browser tab), and session expiration dates are misconfigured, the session may remain active indefinitely.
+
+This then allows an attacker using the same browser later to access the user’s account without needing credentials, exploiting the fact that sessions never expire and remain authenticated.
+
+Your friend tells you to check out a new social media platform he built a few years ago. Although its still under development, he said the site is almost complete. He also mentioned that he hates constantly logging into sites, and so has made his page that 'once you login, you never have to log-out again'!
+
+Browse here - http://dolphin-cove.picoctf.net:57675/login
+Find the flag!
+
+Hints
+1. Do you know how to use the web inspector?
+2. Where are cookies stored?
+
+=========================================================
+
+Flag recovered.
+Challenge Classification
+Category: Web Exploitation
+Difficulty: Easy
+Investigation
+Tools Used: curl, web inspection
+Evidence:
+- Session cookies are set with Expires=Tue, 09 Apr 2058 — they never expire (_permanent: True)
+- /sessions endpoint leaks all server-side session IDs, including the admin's: fngLLWBtq8MhXd3glEe-18YCnx1nuHTAeRk10eCcDrA with key: admin
+Solution
+Reasoning: Because sessions never expire, I took the admin's leaked session cookie from /sessions and sent it as the session cookie. The server honored it as a valid authenticated session and returned the flag on the homepage.
+Flag: picoCTF{s3t_s3ss10n_3xp1rat10n5_51c526ab}
+Confidence: High
+Learning
+Successful approach: Enumerated hidden routes (discovered /sessions from a site comment), then reused the leaked admin session ID since session expiration was misconfigured.
+Failed approach: None significant — standard credential flow and route mapping worked.
+Future improvement: The _permanent/expiry check is the real fix; proper session expiry and not exposing active session store would prevent this.
+
+=========================================================
+
+@prompts/ctf_security_agent.md
+@prompts/web_exploitation_expert.md
+
+You are a Web Exploitation CTF Security Agent.
+
+Your task is to analyze and solve the following CTF challenge.
+
+Web Exploitation - Crack the Gate 1
+
+We’re in the middle of an investigation. One of our persons of interest, ctf player, is believed to be hiding sensitive data inside a restricted web portal. We’ve uncovered the email address he uses to log in: ctf-player@picoctf.org. Unfortunately, we don’t know the password, and the usual guessing techniques haven’t worked. But something feels off... it’s almost like the developer left a secret way in. Can you figure it out?
+
+The website is running here
+http://amiable-citadel.picoctf.net:62936/
+
+Can you try to log in?
+
+Hints
+1. Developers sometimes leave notes in the code; but not always in plain text.
+2. A common trick is to rotate each letter by 13 positions in the alphabet.
+
+======================================================
+
+Flag recovered.
+Challenge Classification
+Category: Web Exploitation
+Difficulty: Easy
+Investigation
+Tools Used: curl, ROT13 decoding
+Evidence:
+- HTML comment <!-- ABGR: Wnpx - grzcbenel olcnff: hfr urnqre "K-Qri-Npprff: lrf" -->
+- ROT13 decodes to: NOTE: Jack - temporary bypass: use header "X-Dev-Access: yes"
+- Adding X-Dev-Access: yes header to the /login POST with ctf-player@picoctf.org bypassed authentication
+Solution
+Reasoning: The developer's ROT13-encoded comment revealed a hidden dev bypass header. Sending it alongside the login request authenticated the player account without a valid password and returned the flag.
+Flag: picoCTF{brut4_f0rc4_7e5db33b}
+Confidence: High
+
+======================================================
+
+@prompts/ctf_security_agent.md
+@prompts/web_exploitation_expert.md
+
+You are a Web Exploitation CTF Security Agent.
+
+Your task is to analyze and solve the following CTF challenge.
+
+I made a cool website where you can announce whatever you want! Try it out!
+
+I heard templating is a cool and modular way to build web apps! Check out my website here:
+http://rescued-float.picoctf.net:57946/
+
+Hints
+1. Server Side Template Injection
+
+=======================================================
+
+Flag recovered.
+Challenge Classification
+Category: Web Exploitation
+Difficulty: Easy
+Investigation
+Tools Used: curl
+Evidence:
+- Flask app uses render_template_string on The content form field (confirmed in app.py)
+- {{7*7}} returned 49, confirming SSTI
+- {{url_for.__globals__.os.popen(...).read()}} gave RCE; ls -la showed a flag file in the working directory
+Solution
+Reasoning: The app unsafely renders user input via Jinja2. I exploited SSTI to execute shell commands through url_for.__globals__.os.popen and read the flag file.
+Flag: picoCTF{s4rv3r_s1d3_t3mp14t3_1nj3ct10n5_4r3_c001_09365533}
+Confidence: High
+
+=========================================================
+
+Web Exploitation - Sql Map1
+
+You’ve been hired by a shadowy group of pentesters who love a good puzzle. The system looks ordinary, but appearances lie. Somewhere inside, sloppy code and legacy hashing practices left a tiny, perfect doorway for an attacker.
+
+Your mission — should you choose to accept it — is to slip through that doorway, act as a legit user and retrieve the secret flag.
+
+Login here:
+http://lonely-island.picoctf.net:61970/
+Find the flag!
+
+Hints
+1. Search box looks interesting.
+2. Passwords should not be stored in md5 format.
+3. CrackStation is a great online tool for cracking hashes.
+4. Sample SqlMap command: sqlmap -u <URL_for_search> --cookie="PHPSESSID=1111111111111" -p <vulnerable_parameter> --batch --tables
+
+==========================================================
+
+Verified: the flags table only contains decoys. The real flag is on secret.php, accessible only by logging in as ctf-player. The &lt;&gt; in the response are HTML-escaped literal <> characters.
+Challenge Classification
+Category: Web Exploitation
+Difficulty: Medium
+Investigation
+Tools Used: curl, SQL injection (UNION-based), hash cracking
+Evidence:
+- vuln.php?q= was SQL-injectable (SQLite); UNION injection dumped sqlite_master and tables flags, users
+- Dumped users table: MD5 password hashes for admin, ctf-player, ghost, malicious, noaccess, suspicious
+- Cracked ctf-player's md5 hash 7a67ab5872843b22b5e14511867c4e43 → dyesebel (via rockyou wordlist)
+- logging in as ctf-player redirected to secret.php (not vuln.php), which revealed The flag
+Solution
+Reasoning: Exploited the SQLi to extract the users table, cracked the md5 password, and logged in as the legit ctf-player user to reach the protected page.
+Flag: picoCTF{F0uNd_s3cr3T_K3y_f0R_w3_<>}
+Confidence: High
+
+==========================================================
+
+@prompts/ctf_security_agent.md
+@prompts/binary_expert.md
+@prompts/malware_expert.md
+
+@challenges\challenge10_binary_01\vuln.c
+@challenges\challenge10_binary_01\vuln
+
+You are a Binary Expert CTF Security Agent.
+
+Your task is to analyze and solve the following CTF challenge.
+
+Binary Exploitation - Input Injection 1
+
+A friendly program wants to greet you… but its goodbye might say more than it should. Can you convince it to reveal the flag?
+
+Connect to the challenge instance:
+nc amiable-citadel.picoctf.net 60046. 
+
+Hints
+1. Look closely at how the program stores and uses your input.
+
+==========================================================
+
+Flag recovered.
+Challenge Classification
+Category: Binary Exploitation
+Difficulty: Easy
+Investigation
+Binary information: 64-bit ELF (vuln, 17KB)
+Security protections: NX/PIE present but irrelevant — no canary/RELRO needed
+Evidence (from vuln.c):
+- fun() declares char c[10] (holds cmd = "uname") then char buffer[10]
+- strcpy(c, cmd) then strcpy(buffer, name) — the 200-byte input overflows buffer[10] upward into adjacent c[10], overwriting the command string
+- system(c) then executes whatever overwrote c
+Solution
+Reasoning: Input of 10 padding bytes + a command overwrites the c buffer that is passed to system(). Sent A×10 + cat flag.txt → program executed it and printed the flag.
+Flag: picoCTF{0v3rfl0w_c0mm4nd_a9259e7a}
+Confidence: High
+
+==========================================================
+
+@prompts/ctf_security_agent.md
+@prompts/binary_expert.md
+@prompts/malware_expert.md
+@prompts/binary_reverse_expert.md
+@prompts/pwn_expert.md
+
+@challenges\challenge11_binary_sice_cream\ld-2.23.so
+@challenges\challenge11_binary_sice_cream\libc.so.6
+@challenges\challenge11_binary_sice_cream\sice_cream
+
+You are a Binary Expert CTF Security Agent.
+
+Your task is to analyze and solve the following CTF challenge.
+
+Binary Exploitation - sice_cream
+
+Just pwn the program and get the flag!
+ 
+Connect to it with nc fickle-tempest.picoctf.net 59749. 
+You can download the sice_cream program, libc.so.6 and ld-2.23.so.
+
+Hints
+1. Make sure to both files are in the same directory as the executable, and set LD_PRELOAD to the path of libc.so.6
+
+==========================================================
+
+Challenge solved. The flag is:
+flag{th3_r3al_questi0n_is_why_1s_libc_2.23_still_4_th1ng_B6abE8b4}
+Summary of the solve
+Technique: House of Orange (FSOP) against glibc 2.23, on fickle-tempest.picoctf.net:59749:
+1. Heap leak — rename over-read past the 0x100 name buffer into the .bss chunk-array → leak chunk0 → derive heap_base.
+2. Fastbin dup (double-free chunk0) → poison fd to name (0x602040) → malloc a chunk at .bss name → rename forges a fake 0xc1 chunk in name → free(5) drops it into the unsorted bin.
+3. Libc leak — rename over-read reads the unsorted chunk's fd (main_arena+0x58) → libc_base.
+4. FSOP payload — craft a fake _IO_FILE_plus in name (/bin/sh\0, size 0x61, bk=_IO_list_all-0x10, fields _IO_write_base=2/_IO_write_ptr=3, _mode=0, vtable → heap+0xd0), free(6) into the fastbin so the trigger malloc doesn't consume the corrupted unsorted chunk, then alloc(0x50, system*7) to place system at the fake vtable's _IO_OVERFLOW slot.
+5. Trigger — malloc(0x10) runs the unsortedbin attack (_IO_list_all ← unsorted head), then a malformed second iteration fires malloc_printerr → abort → _IO_flush_all_lockp, which walks the fake chain and calls system("/bin/sh").
+Key issues hit along the way:
+- The rename-output parser (recvuntil(b'!')) truncated leaks when a pointer byte equaled ! (0x21) → switched to recvuntil(b'!\n') with the full prompt prefix.
+- The FSOP's first fake FILE reads main_arena bin-slot values that vary with ASLR → the first _IO_OVERFLOW call sometimes jumps to a garbage pointer (crash). Not deterministic, so sice_hack.py retries (~60-75%/attempt) and caught the flag on the first batch.
+Files: sice_hoo.py (single-shot), sice_hack.py (retry loop), synced to /home/jason/sice/.
+
+==========================================================
+
+./prompts/ctf_security_agent.md
+./prompts/web_expert.md
+./prompts/web_exploitation_expert.md
+
+You are a Web Exploitation CTF Security Agent.
+
+Your task is to analyze and solve the following CTF challenge.
+
+Web Exploitation - Crack the Gate 1
+
+We’re in the middle of an investigation. One of our persons of interest, ctf player, is believed to be hiding sensitive data inside a restricted web portal. We’ve uncovered the email address he uses to log in: ctf-player@picoctf.org. Unfortunately, we don’t know the password, and the usual guessing techniques haven’t worked. But something feels off... it’s almost like the developer left a secret way in. Can you figure it out?
+
+The website is running here
+http://amiable-citadel.picoctf.net:59555/
+Can you try to log in?
+
+Hints
+1. Developers sometimes leave notes in the code; but not always in plain text.
+2. A common trick is to rotate each letter by 13 positions in the alphabet.
+
+==========================================================
+
+Solved. The flag is picoCTF{brut4_f0rc4_7e5db33b}.
+Method: ROT13 comment in page source revealed a dev header bypass (K-Dev-Access), but the server actually checks X-Dev-Access: yes — that passed the auth middleware and logged in as ctf-player@picoctf.org with any password, returning the flag.
+
+==========================================================
+
+@prompts/ctf_security_agent.md
+@prompts/web_expert.md
+@prompts/web_exploitation_expert.md
+
+@challenges\challenge13_web_NorthSouth\nginx.conf
+
+You are a Web Exploitation CTF Security Agent.
+
+Your task is to analyze and solve the following CTF challenge.
+
+Web Exploitation - North-South
+
+I've set up geo-based routing - can you outsmart it?
+
+You're trying to retrieve the flag, but there's a catch: access to the real service is restricted based on your geographic location. Only requests from a specific region are routed to the server that holds the flag. Everyone else is sent somewhere... less interesting.
+
+You can begin your journey here:
+http://lonely-island.picoctf.net:64266/
+To try and find the flag.
+
+For reference, the full Nginx configuration used in this challenge is available here.
+
+Hints
+1. How does a server figure out where in the world you're connecting from?
+2. Can you "travel" to another location without ever leaving your chair?
+
+==========================================================
+
+opencode can did it with 1 minute! after second attempts! the first attempt it needs to building...
+
+Flag obtained: picoCTF{g30_b453d_r0u71n9_ac6ed215}
+Method:
+1. Read nginx.conf — geoip2 routing sends IS (Iceland) IPs to the flag server ("south").
+2. Header spoofing (X-Forwarded-For, etc.) failed since geoip uses the real TCP source IP.
+3. Ran local Tor with ExitNodes pinned to Iceland exit nodes that allow all ports (iceberg, limitededition, ageinghacker) + StrictNodes 1, then routed the request via --socks5-hostname 127.0.0.1:9050 to make the request appear from Iceland.
+
+==========================================================
+
+./prompts/ctf_security_agent.md
+./prompts/web_expert.md
+./prompts/web_exploitation_expert.md
+
+./challenges/challenge14_web_foolTheLockout/creds-dump.txt
+./challenges/challenge14_web_foolTheLockout/app.py
+
+You are a Web Exploitation CTF Security Agent.
+
+Your task is to analyze and solve the following CTF challenge.
+
+Web Exploitation - Fool the Lockout
+
+Your friend is building a simple website with a login page.
+
+To stop brute forcing and credential stuffing, they’ve added an IP-based rate limit: exceed the attempt threshold and your IP is blocked for a while. They’re convinced this makes guessing credentials impossible.
+
+To test their defense, they’ve:
+
+Browse: http://candy-mountain.picoctf.net:53460/login
+
+Created a dummy account with a random username–password pair from public credential lists.
+Given you those username and password lists.
+Shared the full source code.
+Can you bypass the rate limit, log in, and capture the flag?
+
+Hints
+1. The python requests library might be useful
+
+==========================================================
+
+opencode can decoded it too! but not that fast!
+
+Flag obtained: picoCTF{f00l_7h4t_l1m1t3r_b56b614c}
+Method:
+1. Read app.py — the rate limit keys on request.remote_addr, blocks when num_requests > 10 within a 30s window.
+2. The counter resets after 30s (EPOCH_DURATION), so the lockout is defeatable by pacing: ≤10 attempts per 30s window.
+3. Brute-forced all 100 username;password pairs from creds-dump.txt with Python requests, sleeping 32s every 9 attempts to stay under the limit. Credential emely:tyrant succeeded.
+
+==========================================================
+
+@prompts/ctf_security_agent.md
+@prompts/binary_expert.md
+@prompts/malware_expert.md
+@prompts/binary_reverse_expert.md
+@prompts/pwn_expert.md
+
+You are a Binary Expert CTF Security Agent.
+
+Your task is to analyze and solve the following CTF challenge.
+
+Binary Exploitation - offset-cycle
+
+It's a race against time. Solve the binary exploit ASAP.
+
+ssh -p 49987 ctf-player@green-hill.picoctf.net using password a15d25e1
+
+Hints
+1. Each binary is different.
+2. Use gdb, pwncyclic and pwntools are installed on the machine.
+
+==========================================================
+
+opencode wins! because it can continue do without timeout!
+Exploit successful. The flag is:
+picoCTF{u_Us3d_pwNt00L5_f1d96c5f}
+Approach:
+- The generated binary 1 was a 32-bit, non-PIE, no-canary ELF with a gets() overflow in vuln() (buf at ebp-0x26).
+- Exploit used pwntools to dynamically find the offset via the get_return_address() leak: sent a cyclic pattern, parsed the leaked 0x%x return address, and ran cyclic_find(p32(leak)) to get the offset (42).
+- Then overwrote the return address with win() at 0x080491f6, which read and printed CodeBank/flag.txt.
+
+==========================================================
+
+@prompts/ctf_security_agent.md
+@prompts/binary_expert.md
+@prompts/malware_expert.md
+@prompts/binary_reverse_expert.md
+@prompts/pwn_expert.md
+
+@challenges/challenge15_binary_tea-cash/heapedit
+@challenges/challenge15_binary_tea-cash/heapedit.c
+@challenges/challenge15_binary_tea-cash/libc.so.6
+@challenges/challenge15_binary_tea-cash/Makefile.share
+
+You are a Binary Expert CTF Security Agent.
+
+Your task is to analyze and solve the following CTF challenge.
+
+Binary Exploitation - tea-cash
+
+You’ve stumbled upon a mysterious cash register that doesn’t keep money — it keeps secrets in memory. Traverse the free list and find all the free chunks to get to the flag. Download the files here: heapedit, Makefile.share, libc.so.6, heapedit.c
+
+nc candy-mountain.picoctf.net 64832
+
+Hints
+1. It may be helpful to read a little bit on GLIBC's tcache.
+2. Use GDB for memory analysis
+3. Create a local flag.txt and local environment for testings
+
+==========================================================
+
+opencode wins!
+Solved. The flag is:
+picoCTF{642fda7eaff355293107bd2c6f7ceec7}
+Method:
+- The program printed tcache head = chunks[0]. After freeing chunks5→0, the tcache LIFO list is chunks[0] → chunks[1] → ... → chunks[5] → NULL.
+- Since the 6 chunks are allocated contiguously, each is 0x90 bytes apart (0x80 data + 0x10 header).
+- I submitted the addresses in traversal order: head + i*0x90 for i = 0..5, which matched the stored next pointers in each freed chunk, passing the validation and triggering the flag print.
+
+==========================================================
+
+@prompts/ctf_security_agent.md
+@prompts/binary_expert.md
+@prompts/malware_expert.md
+@prompts/binary_reverse_expert.md
+@prompts/pwn_expert.md
+
+@challenges/challenge16_binary_PieTime2/vuln
+@challenges/challenge16_binary_PieTime2/vuln.c
+
+You are a Binary Expert CTF Security Agent.
+
+Your task is to analyze and solve the following CTF challenge.
+Binary Exploitation - PIE TIME 2
+
+Can you try to get the flag? I'm not revealing anything anymore!!
+
+Connect to the program with netcat: $ nc rescued-float.picoctf.net 61203 
+The program's source code can be downloaded here. The binary can be downloaded here.
+
+Hints
+1. What vulnerability can be exploited to leak the address?
+2. Please be mindful of the size of pointers in this binary
+
+==========================================================
+
+opencode wins!
+Solved. The flag is:
+picoCTF{p13_5h0u1dn'7_134k_1e55cd55}
+Method:
+- Exploited the printf(buffer) format string vulnerability to leak two PIE pointers: position 16 (base + 0x11c0 = _start) and position 19 (base + 0x1441, a return address into main).
+- Cross-checked both to confirm the PIE base, computed win = base + 0x136a (offset found via ELF symbol parsing).
+- sent The address to The scanf("%lx") prompt and jumped to win(), which printed The flag.
+
+==========================================================
+
+@prompts/ctf_security_agent.md
+@prompts/binary_expert.md
+@prompts/malware_expert.md
+@prompts/binary_reverse_expert.md
+@prompts/pwn_expert.md
+
+@challenges/challenge17_binary_x-sixty-what/vuln
+@challenges/challenge17_binary_x-sixty-what/vuln.c
+
+You are a Binary Expert CTF Security Agent.
+
+Binary Exploitation - x-sixty-what
+
+Overflow x64 code
+
+Most problems before this are 32-bit x86. Now we'll consider 64-bit x86 which is a little different! Overflow the buffer and change the return address to the flag function in this program. Download source.
+
+nc saturn.picoctf.net 61384
+
+Hints
+1. Now that we're in 64-bit, what used to be 4 bytes, now may be 8 bytes.
+2. Jump to the second instruction (the one after the first push) in the flag function, if you're getting mysterious segmentation faults.
+
+==========================================================
+
+opencode wins!
+Solved. The flag is:
+picoCTF{b1663r_15_b3773r_d95e02b6}
+Method:
+- Found flag() at 0x401236 via ELF symbol parsing; vuln() had buf at rbp-0x40 (64 bytes), so return-address offset = 72.
+- Jumped to 0x40123b (flag+5, the instruction after push rbp): landing at the full prologue would leave rsp % 16 == 8 for fopen/fgets/printf (movaps segfault), but skipping the push keeps 16-byte alignment.
+- Payload: 72 As + p64(0x40123b).
+
+==========================================================
+
+@prompts/ctf_security_agent.md
+@prompts/binary_expert.md
+@prompts/malware_expert.md
+@prompts/binary_reverse_expert.md
+@prompts/pwn_expert.md
+
+You are a Binary Expert CTF Security Agent.
+
+Your task is to analyze and solve the following CTF challenge.
+
+Binary Exploitation - hijacking
+
+Getting root access can allow you to read the flag. Luckily there is a python file that you might like to play with.
+
+Through Social engineering, we've got the credentials to use on the server. SSH is running on the server.
+
+saturn.picoctf.net 64196 Username: picoctf Password: Y6m8V+HM-Q
+
+Hints
+1. Check for Hidden files
+2. No place like Home:)
+
+==========================================================
+
+opencode wins!
+Solved. The flag is:
+picoCTF{pYth0nn_libraryH!j@CK!n9_4c188d27}
+Method:
+- Found we could run .server.py as root via sudo (NOPASSWD).
+- The script does import socket, and since it runs from /home/picoctf/ (which we own), sys.path[0] points there.
+- Placed a malicious socket.py in /home/picoctf/ — Python imported it as root during .server.py execution, letting us read /root/.flag.txt.
+
+==========================================================
+
+@prompts/ctf_security_agent.md
+@prompts/binary_expert.md
+@prompts/malware_expert.md
+@prompts/binary_reverse_expert.md
+@prompts/pwn_expert.md
+
+@challenges/challenge18_BinaryGauntlet3/gauntlet
+@challenges/challenge18_BinaryGauntlet3/libc-2.27.so
+
+You are a Binary Expert CTF Security Agent.
+
+Your task is to analyze and solve the following CTF challenge.
+
+Binary Exploitation - Binary Gauntlet 3
+
+The stack is no longer executable. The flag for this challenge does not include the standard picoCTF{} wrapper.
+
+gauntlet
+libc-2.27.so
+
+nc -v wily-courier.picoctf.net 59134
+
+==========================================================
+
+opencode wins!
+Solved. The one_gadget at libc+0x4f302 worked, giving a shell. The flag is:
+226e4029506ec49a3a16914958c28d65
+Method:
+- Identified two vulns: printf(buffer) format string and unbounded strcpy into a 112-byte stack buffer.
+- Leaked %23$p → __libc_start_main + 0xe7, computed libc_base = leak - 0x21ba0 - 0xe7.
+- Since strcpy stops at NUL bytes, a full ROP chain is impossible — instead jumped to the one_gadget at libc+0x4f302 (execve("/bin/sh", rsp+0x40, environ)), found by disassembling the provided libc-2.27.so for a lea rdi, [/bin/sh] → call execve sequence.
+- Payload: 120 As + p64(libc_base + 0x4f302) (the address's inherent trailing NULs terminate strcpy as a valid partial overwrite), then popped a shell and read /app/flag.txt.
+
+==========================================================
+
+@prompts/ctf_security_agent.md
+@prompts/binary_expert.md
+@prompts/malware_expert.md
+@prompts/binary_reverse_expert.md
+@prompts/pwn_expert.md
+
+@challenges/challenge19_binary_GuessingGame1/Makefile.share
+@challenges/challenge19_binary_GuessingGame1/vuln
+@challenges/challenge19_binary_GuessingGame1/vuln.c
+
+You are a Binary Expert CTF Security Agent.
+
+Your task is to analyze and solve the following CTF challenge.
+
+Binary Exploitation - Guessing Game 1
+
+I made a simple game to show off my programming skills. See if you can beat it!
+
+Connect to the server with nc shape-facility.picoctf.net 50269.
+
+Hints
+1. Tools can be helpful, but you may need to look around for yourself.
+2. Remember, in CTF problems, if something seems weird it probably means something...
+
+==========================================================
+
+opencode wins!
+Solved. The flag is:
+picoCTF{r0p_y0u_l1k3_4_hurr1c4n3_476d756f24c7952d}
+Method:
+- rand() is never seeded, so the first guess is always rand()%100 + 1 = 84 — sent that to reach win().
+- win() reads 360 bytes via fgets into a 100-byte buffer (offset to return address = 120).
+- Static binary, NX enabled, no /bin/sh/system — built a ROP chain that:
+1. Wrote "/bin/sh" into .data via pop rsi + pop rax + mov qword ptr [rsi], rax; ret
+2. Set rax=59, rdi=.data, rsi=0, rdx=0 and hit a syscall gadget → execve("/bin/sh")
+- Popped a shell and read flag.txt.
+
+==========================================================
+
+@prompts/ctf_security_agent.md
+@prompts/devops_expert.md
+@prompts/binary_expert.md
+@prompts/malware_expert.md
+@prompts/binary_reverse_expert.md
+@prompts/pwn_expert.md
+@prompts/crypto_expert.md
+@prompts/forensics_expert.md
+@prompts/web_expert.md
+@prompts/web_exploitation_expert.md
+
+Artificial Intelligence - Perceptron Train XOR
+
+Watch a perceptron learn in real time on XOR data using the classic update rule: only misclassified points trigger updates, with no weight decay. Because XOR is not linearly separable, a single perceptron cannot hit 100% accuracy. Reach 75% accuracy to prove you understand the limitation and reveal the flag.
+
+Visit the service in your browser:
+http://aureolin-pixie.cylabacademy.net:60608/
+
+Hints
+1. You get 16 updates per run, and correctly classified points do not change the model in the classic rule.
+2. The learning-rate sweep is wide (0.02 through 20.0), so very high values can swing the boundary aggressively.
+3. XOR cannot be perfectly separated by one line; 75% is the best achievable target for this setup.
+4. Use the slider to sweep the range and watch how the decision boundary moves between misclassification updates.
+
+==========================================================
+
+opencode wins!
+Solved. The flag was returned directly by the /train endpoint:
+academy{x0r_unl34rn4bl3_by_p3rc3ptr0ns_89cd5062}
+Method:
+- Inspected the app's app.js and /config.json: 4 XOR points, initial model w=(1,-1), b=0, 16 updates max, 75% target.
+- Called POST /train with a learning rate; the server runs the classic update rule (only misclassified points update, no weight decay). With lr=1.0, only 2 updates were needed — the boundary shifted to x - y - 2 = 0, correctly classifying 3/4 points (75%).
+- The response included "flag" when success was true.
+
+==========================================================
+
+@prompts/ctf_security_agent.md
+@prompts/devops_expert.md
+@prompts/forensics_expert.md
+@prompts/binary_expert.md
+@prompts/malware_expert.md
+@prompts/binary_reverse_expert.md
+@prompts/pwn_expert.md
+
+Reverse Engineering - Pico Bank
+
+In a bustling city where innovation meets finance, Pico Bank has emerged as a beacon of cutting-edge security. Promising state-of-the-art protection for your assets, the bank claims its mobile application is impervious to all forms of cyber threats. Pico Bank’s tagline, "Security Beyond the Limits," echoes through its high-tech marketing campaigns, assuring users of their utmost safety.
+
+As a cybersecurity enthusiast, your mission is to test these bold claims. You’ve been hired by a secretive organization to put Pico Bank’s mobile app through a rigorous security assessment. The flag might be in one or more locations, and additional information reveals that a Pico Bank user’s credentials were leaked in an unusual way. Your task is to crack the username and password based on the following profile information: His name is Alex Johnson with the email johnson@picobank.com, Date of Birth: March 14, 1990, Last Transaction Amount: $345.67, Pet name: tricky, and Favorite Color: Blue.
+
+Access the Pico Bank Website Pico Bank Website and download the application.
+http://amiable-citadel.picoctf.net:61516/
+
+To perform this challenge, you can use any Android emulator. Some examples include Genymotion Android Emulator or Android Studio.
+https://www.genymotion.com/product-desktop/download/
+https://developer.android.com/studio
+
+Hints
+1. Use tools like JadxGUI or apktool to inspect the APK.
+2. Look at the app's network requests, especially for login and OTP.
+3. The flag has two parts.
+4. Check the server’s response after entering the correct OTP.
+5. Investigate the transaction history for unusual data.
+
+==========================================================
+
+opencode wins!
+
+Got it. Server returned part 2. Combined flag:
+picoCTF{1_l13d_4b0ut_b31ng_s3cur3d_m0b1l3_l0g1n_e1e409ae}
+Let me verify against the challenge site to confirm it's valid.
+$ Set-Content -Path C:\Users\Jason\AppData\Local\Temp\opencode\flag.json -Value '{"flag":"picoCTF{1_l13d_4b0ut_b31ng_s3cur3d_m0b1l3_l0g1n_e1e409ae}"}'; curl.exe -s -X POST "http://amiable-citadel.picoctf.net:61516/submit-flag" -H "Content-Type: application/json" -d "@C:\Users\Jason\AppData\Local\Temp\opencode\flag.json"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot POST /submit-flag</pre>
+</body>
+</html>
+No submit endpoint needed. The flag is complete:
+picoCTF{1_l13d_4b0ut_b31ng_s3cur3d_m0b1l3_l0g1n_e1e409ae}
+How I solved it:
+- Login (Login$1.smali): username johnson, password tricky1990
+- OTP (OTP.smali): stored in R.string.otp_value → 9673
+- Part 1: MainActivity.smali transaction "amounts" are binary → decode to picoCTF{1_l13d_4b0ut_b31ng_
+- Part 2: POST {"otp":"9673"} to /verify-otp → response "flag":"s3cur3d_m0b1l3_l0g1n_e1e409ae}"
+
+==========================================================

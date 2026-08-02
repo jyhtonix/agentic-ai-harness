@@ -232,5 +232,34 @@
     ],
     "success": true,
     "recorded_at": "2026-08-01T03:36:26.448338+00:00"
+  },
+  {
+    "challenge_id": "c1",
+    "category": "crypto",
+    "difficulty": "m",
+    "approach": "solved_with_strategy_crypto_agent",
+    "tools_used": [
+      "python"
+    ],
+    "agents_used": [
+      "crypto_agent"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-02T14:39:40.529931+00:00",
+    "flag_result": "PASS",
+    "confidence": 0.9
+  },
+  {
+    "challenge_id": "c1",
+    "category": "crypto",
+    "difficulty": "m",
+    "approach": "solved_with_strategy_crypto_agent",
+    "tools_used": [],
+    "agents_used": [
+      "crypto_agent"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-02T14:39:40.647032+00:00",
+    "flag_result": "PASS"
   }
 ]
