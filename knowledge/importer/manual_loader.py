@@ -16,6 +16,8 @@ from typing import Optional
 
 from memory.solutions import SolutionMemory
 from memory.strategies import StrategyMemory
+from knowledge.capture.experience_capture import capture_solve
+from knowledge.capture.solve_summary import CaptureSummary
 
 logger = logging.getLogger("knowledge.importer.manual_loader")
 
@@ -317,48 +319,35 @@ class ManualKnowledgeLoader:
 
     def _store(self, fields: dict) -> None:
         challenge_name = fields["challenge_name"]
-        category = fields["category"]
-        confidence = fields["confidence"]
         tools = fields["tools_used"]
         techniques = self._to_technique_list(fields["evidence"])
         lessons = self._to_technique_list(fields["lessons_learned"])
         failed = fields["failed_approach"]
         failed_list = [failed] if failed and failed.lower() != "none" else []
 
-        self.solution_memory.record(
+        summary = CaptureSummary(
             challenge_id=challenge_name,
-            category=category,
+            category=fields["category"],
             difficulty=fields["difficulty"],
-            approach=fields["solution"] or challenge_name,
+            description=challenge_name,
+            approach=fields["solution"],
             tools_used=tools,
             agents_used=["manual_import"],
-            success=True,
-            description=self._find_label_value(
-                self._prompt_part(fields), "challenge"
-            ) or challenge_name,
             skills_selected=techniques + lessons,
-            actions_commands=tools,
             successful_techniques=techniques,
             failed_approaches=failed_list,
             final_solution_reasoning=fields["reasoning"],
             flag_result=fields["flag"],
-            confidence=confidence,
-            source_metadata={
-                "source": "manual_record",
-                "filename": self.source_file.name,
-                "imported_by": self.imported_by,
-                "imported_at": self._now(),
-            },
+            confidence=fields["confidence"],
+            source="manual_record",
+            imported_by=self.imported_by,
+            source_filename=self.source_file.name,
         )
-
-        if fields["solution"]:
-            self.strategy_memory.record(
-                category,
-                f"{challenge_name}: {fields['solution'][:120]}",
-                confidence=confidence,
-            )
-        if failed_list:
-            self.strategy_memory.record_failed(category, failed, failure_reason=failed)
+        capture_solve(
+            summary,
+            solution_memory=self.solution_memory,
+            strategy_memory=self.strategy_memory,
+        )
 
     @staticmethod
     def _prompt_part(fields: dict) -> str:
