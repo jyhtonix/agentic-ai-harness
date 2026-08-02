@@ -786,5 +786,33 @@
     ],
     "flag_result": "picoCTF{1_l13d_4b0ut_b31ng_s3cur3d_m0b1l3_l0g1n_e1e409ae}",
     "confidence": 0.5
+  },
+  {
+    "challenge_id": "Echo Escape 2",
+    "category": "pwn",
+    "difficulty": "unknown",
+    "approach": "Echo Escape 2",
+    "tools_used": [
+      "nc",
+      "netcat"
+    ],
+    "agents_used": [
+      "manual_import"
+    ],
+    "success": true,
+    "recorded_at": "2026-08-02T15:44:01.809099+00:00",
+    "source_metadata": {
+      "source": "manual_record",
+      "imported_by": "Jason",
+      "captured_at": "2026-08-02T15:44:01.809099+00:00",
+      "filename": "manual_record.txt"
+    },
+    "description": "Echo Escape 2",
+    "actions_commands": [
+      "nc",
+      "netcat"
+    ],
+    "flag_result": "picoCTF{fgets_0v3rfl0w42_9311310a}",
+    "confidence": 0.5
   }
 ]
