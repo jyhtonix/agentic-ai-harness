@@ -1,0 +1,24 @@
+{
+  "challenge_id": "crypto_basic_001",
+  "category": "cryptography",
+  "difficulty": "beginner",
+  "status": "failed",
+  "flag_result": "FAIL",
+  "execution_time": 0.0,
+  "confidence": 0.2,
+  "attempts": 3,
+  "tools_used": [
+    "python"
+  ],
+  "agents_used": [
+    "crypto_agent"
+  ],
+  "failure_reason": null,
+  "failure_category": null,
+  "verification_details": {
+    "status": "failed",
+    "confidence_score": 0.2,
+    "findings": []
+  },
+  "timestamp": "2026-08-02T04:00:01.272002+00:00"
+}
