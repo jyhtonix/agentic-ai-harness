@@ -49,7 +49,10 @@ class OpenAILLM(LLM):
         self.model = model or settings.openai_model
         self.temperature = settings.llm_temperature
         self.max_tokens = settings.llm_max_tokens
-        self._client = AsyncOpenAI(api_key=settings.openai_api_key)
+        self._client = AsyncOpenAI(
+            api_key=settings.openai_api_key,
+            base_url=settings.openai_base_url,
+        )
 
     async def chat(self, messages: list[dict], **kwargs) -> LLMResponse:
         response = await self._client.chat.completions.create(

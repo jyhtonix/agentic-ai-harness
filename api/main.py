@@ -26,6 +26,7 @@ import os
 import time
 import uuid
 from contextlib import asynccontextmanager
+from typing import Optional
 
 from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware

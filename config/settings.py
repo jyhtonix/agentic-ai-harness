@@ -10,55 +10,66 @@ Clean architecture: This is the outermost layer — every other module
 imports from here rather than from os.environ directly.
 """
 
-from pydantic_settings import BaseSettings
-
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    # LLM provider configuration
-    openai_api_key: str = ""
-    openai_model: str = "gpt-4o"
-    llm_temperature: float = 0.7
-    llm_max_tokens: int = 4096
+# LLM provider configuration
+# The actual API key is loaded from .env / environment variable.
+openai_api_key: str
 
-    # Embedding
-    embedding_model: str = "text-embedding-3-small"
-    embedding_dimension: int = 1536
+```
+openai_base_url: str = "https://openrouter.ai/api/v1"
+openai_model: str = "deepseek/deepseek-v4-flash"
+llm_temperature: float = 0.7
+llm_max_tokens: int = 4096
 
-    # Database
-    database_url: str = "postgresql+asyncpg://agent:agent@localhost:5432/agent_harness"
+# Embedding
+embedding_model: str = "text-embedding-3-small"
+embedding_dimension: int = 1536
 
-    # Vector store ("memory" or "pgvector")
-    vector_store: str = "memory"
+# Database
+database_url: str = (
+    "postgresql+asyncpg://agent:agent@localhost:5432/agent_harness"
+)
 
-    # Server
-    host: str = "0.0.0.0"
-    port: int = 8000
-    log_level: str = "INFO"
-    debug: bool = False
+# Vector store ("memory" or "pgvector")
+vector_store: str = "memory"
 
-    # Security
-    api_key: str = ""
-    cors_origins: list[str] = ["*"]
-    rate_limit_requests: float = 10.0
-    rate_limit_burst: float = 20.0
-    max_request_size: int = 1_048_576
+# Server
+host: str = "0.0.0.0"
+port: int = 8000
+log_level: str = "INFO"
+debug: bool = False
 
-    # Monitoring
-    sentry_dsn: str = ""
-    json_logging: bool = False
+# Security
+api_key: str = ""
+cors_origins: list[str] = ["*"]
+rate_limit_requests: float = 10.0
+rate_limit_burst: float = 20.0
+max_request_size: int = 1_048_576
 
-    # Cache
-    llm_cache_size: int = 500
-    llm_cache_ttl: int = 3600
+# Monitoring
+sentry_dsn: str = ""
+json_logging: bool = False
 
-    # Skills System
-    skills_dir: str = "skills"
-    skill_cache_ttl: int = 3600
-    skill_auto_load: bool = True
-    skill_index_auto_build: bool = True
-    skill_injection_budget: int = 2048
+# Cache
+llm_cache_size: int = 500
+llm_cache_ttl: int = 3600
 
-    model_config = {"env_file": ".env", "extra": "ignore"}
+# Skills System
+skills_dir: str = "skills"
+skill_cache_ttl: int = 3600
+skill_auto_load: bool = True
+skill_index_auto_build: bool = True
+skill_injection_budget: int = 2048
 
+# Load values from .env
+# Real environment variables take precedence over .env.
+model_config = SettingsConfigDict(
+    env_file=".env",
+    env_file_encoding="utf-8",
+    extra="ignore",
+)
+```
 
 settings = Settings()
